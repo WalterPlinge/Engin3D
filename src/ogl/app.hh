@@ -8,7 +8,6 @@
 #include <glm/vec2.hpp>
 
 // GLEW
-#define GLEW_STATIC
 // ReSharper disable once CppUnusedIncludeDirective
 #include <GL/glew.h>
 

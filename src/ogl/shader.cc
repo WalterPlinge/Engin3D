@@ -4,8 +4,9 @@
 // HEADERS
 
 // STD
-#include <iostream>
 #include <fstream>
+#include <iostream>
+#include <memory>
 
 // GLM
 #include <glm/gtc/type_ptr.hpp>

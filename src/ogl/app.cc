@@ -5,6 +5,7 @@
 
 // STD
 #include <cassert>
+#include <climits>
 #include <iostream>
 #include <sstream>
 

@@ -8,7 +8,10 @@
 
 // Project
 #include "body.hh"
-#include "mesh.hh"
+#include "../ogl/mesh.hh"
+
+namespace phy
+{
 
 class RigidBody : public Body {
 public:
@@ -39,5 +42,7 @@ public:
 private:
 	void CalculateInverseInertia();
 };
+
+}
 
 #endif

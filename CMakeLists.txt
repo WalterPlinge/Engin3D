@@ -34,5 +34,14 @@ include_directories(lib/glm)
 
 ## Engin3D
 file(GLOB_RECURSE SOURCES src/*.cc src/*.hh)
-add_executable(Engin3D ${SOURCES})
-target_link_libraries(Engin3D PUBLIC glfw libglew_static glm)
+add_executable(${PROJECT_NAME} ${SOURCES})
+
+target_include_directories(${PROJECT_NAME}
+	PUBLIC
+		src/)
+
+target_link_libraries(${PROJECT_NAME}
+	PUBLIC
+		libglew_static
+		glfw
+		glm)

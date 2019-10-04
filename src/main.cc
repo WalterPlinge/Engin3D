@@ -5,7 +5,6 @@
 #include <iostream>
 
 // GLEW
-#define GLEW_STATIC
 #include <GL/glew.h>
 
 // GLFW
@@ -17,7 +16,7 @@
 #include <glm/ext.hpp>
 
 // Project
-#include <render/app.hh>
+#include "ogl/app.hh"
 using ogl::App;
 
 ///////////////////////////////////////////////////////////////

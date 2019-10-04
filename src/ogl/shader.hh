@@ -10,7 +10,6 @@
 #include <vector>
 
 // GLEW
-#define GLEW_STATIC
 #include <GL/glew.h>
 
 // GLM
