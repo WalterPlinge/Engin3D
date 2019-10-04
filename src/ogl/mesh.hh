@@ -13,8 +13,8 @@
 #include <glm/vec3.hpp>
 
 // Project
-#include <obj/obj.hh>
-#include <ogl/shader.hh>
+#include "../obj/obj.hh"
+#include "shader.hh"
 
 ///////////////////////////////////////////////////////////////
 // RENDER NAMESPACE

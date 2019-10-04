@@ -1,47 +1,31 @@
-## Project settings
+# Settings
+cmake_minimum_required(VERSION 3.11)
+set(CMAKE_DISABLE_SOURCE_CHANGES  ON)
+set(CMAKE_DISABLE_IN_SOURCE_BUILD ON)
 project(Engin3D)
 
-cmake_minimum_required(VERSION 3.11)
-
-set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
-set(BIN_DIR ${CMAKE_BINARY_DIR}/bin)
-
-## C++ version
-set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+#set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
+#set(BIN_DIR ${CMAKE_BINARY_DIR}/bin)
 
 ## Ouput all DLLs from all libs into main build folder
-SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BIN_DIR})
+#SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BIN_DIR})
 
 ## OpenGL
 find_package(OpenGL REQUIRED)
 
-## Load libraries
-# GLEW
-add_definitions(-DGLEW_STATIC)
+# Libraries
+set(glew-cmake_BUILD_SHARED        OFF CACHE BOOL "" FORCE)
+set(glew-cmake_BUILD_MULTI_CONTEXT OFF CACHE BOOL "" FORCE)
 add_subdirectory(lib/glew-cmake)
 
-# GLFW
 set(GLFW_BUILD_DOCS     OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS    OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 add_subdirectory(lib/glfw)
 
-# GLM
-include_directories(lib/glm)
-
-###
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+set(GLM_TEST_ENABLE   OFF CACHE BOOL "" FORCE)
+add_subdirectory(lib/glm)
 
 ## Engin3D
-file(GLOB_RECURSE SOURCES src/*.cc src/*.hh)
-add_executable(${PROJECT_NAME} ${SOURCES})
-
-target_include_directories(${PROJECT_NAME}
-	PUBLIC
-		src/)
-
-target_link_libraries(${PROJECT_NAME}
-	PUBLIC
-		libglew_static
-		glfw
-		glm)
+add_subdirectory(src)

@@ -8,7 +8,7 @@
 
 // Project
 #include "body.hh"
-#include "mesh.hh"
+#include "../ogl/mesh.hh"
 
 class Particle : public Body {
 public:

@@ -5,8 +5,8 @@
 
 // STD
 #include <cassert>
-#include <climits>
 #include <iostream>
+#include <limits>
 #include <sstream>
 
 // GLM
@@ -145,12 +145,12 @@ namespace ogl {
 			const float msPerFrame(1000.0f / fps);
 
 			// Keep track of minimum FPS
-			static float minfps(FLT_MAX);
+			static float minfps = std::numeric_limits<float>::max();
 			if (fps > 1.0f && fps < minfps)
 				minfps = fps;
 
 			// Keep track of maximum FPS
-			static float maxfps(FLT_MIN);
+			static float maxfps = std::numeric_limits<float>::min();
 			if (fps > maxfps)
 				maxfps = fps;
 

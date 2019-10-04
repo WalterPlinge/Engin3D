@@ -15,8 +15,8 @@
 #include <GLFW/glfw3.h>
 
 // Project
-#include <ogl/camera.hh>
-#include <ogl/mesh.hh>
+#include "camera.hh"
+#include "mesh.hh"
 
 ///////////////////////////////////////////////////////////////
 // RENDER NAMESPACE
