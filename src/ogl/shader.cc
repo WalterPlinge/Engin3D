@@ -1,27 +1,29 @@
 #include "shader.hh"
 
-// STD
 #include <fstream>
 #include <memory>
 #include <optional>
+#include <sstream>
 #include <string>
 
-// GLM
 #include <glm/gtc/type_ptr.hpp>
 #include <utility>
 
-// Namespace
+
+
 using namespace std::string_literals;
 using namespace ogl;
 
 
 
 // Return contents of file
-static auto file_content(
-	const std::string& path
-	) -> std::optional<std::string>
+auto static
+file_content(
+	std::string const& path
+	)
+	-> std::optional<std::string>
 {
-	std::ifstream file(path);
+	auto file = std::ifstream(path);
 
 	if(file.good())
 		return std::string(std::istreambuf_iterator<char>(file), {});
@@ -34,77 +36,76 @@ static auto file_content(
 
 
 // Class management
-Shader::Shader(
+Shader::
+Shader(
 	std::string name
-	) : name_(std::move(name))
+	) :
+	name(std::move(name))
 {}
 
-Shader::~Shader(
+Shader::
+~Shader(
 	)
-{ clean(); }
-
-
-
-// Name
-auto Shader::name(
-	) const -> std::string
-{ return name_; }
-
-auto Shader::name(
-	const std::string& name
-	) -> void
-{ name_ = name; }
+{
+	clean();
+}
 
 
 
 // Add shader type, providing code as string or filename
-auto Shader::add(
-	const GLenum&      type,
-	const std::string& code,
-	const bool&        is_file
-	) -> void
+auto Shader::
+add(
+	GLenum             type,
+	std::string const& code,
+	bool               is_file
+	)
+	-> void
 {
-	const auto content = is_file
+	auto const content = is_file
 		? file_content(code).value_or(""s)
 		: code;
 
-	const auto shader = compile(type, content);
+	auto const shader = compile(type, content);
 
 	if (shader)
-		shaders_.push_back(shader);
+		shaders_.emplace_back(shader);
 }
 
 // Add shader type, providing code as string or filename
-auto Shader::add(
-	const GLenum&     type,
-	const code_array& is_file_code
-	) -> void
+auto Shader::
+add(
+	GLenum            type,
+	code_array const& is_file_code
+	)
+	-> void
 {
-	auto content = std::string{};
-	for (const auto& c : is_file_code)
+	auto content = std::stringstream{};
+	for (auto const& c : is_file_code)
 	{
 		if (c.first)
-			content += file_content(c.second).value_or(""s);
+			content << file_content(c.second).value_or(""s);
 		else
-			content += c.second;
+			content << c.second;
 
-		content += '\n';
+		content << '\n';
 	}
 
-	const auto shader = compile(type, content);
+	auto const shader = compile(type, content.str());
 
 	if (shader)
-		shaders_.push_back(shader);
+		shaders_.emplace_back(shader);
 }
 
 
 
 // Build shader program
-auto Shader::build(
-	) -> bool
+auto Shader::
+build(
+	)
+	-> bool
 {
 	program_ = glCreateProgram();
-	for (const auto& s : shaders_)
+	for (auto const& s : shaders_)
 		glAttachShader(program_, s);
 	glLinkProgram(program_);
 
@@ -119,11 +120,11 @@ auto Shader::build(
 	auto log_length = GLint{};
 	glGetProgramiv(program_, GL_INFO_LOG_LENGTH, &log_length);
 
-	const auto log = std::make_unique<char[]>(log_length);
+	auto const log = std::make_unique<char[]>(std::size_t(log_length));
 	glGetProgramInfoLog(program_, log_length, &log_length, log.get());
 
 	std::cerr << "ERROR build failed for shader " <<
-		name_ << ". Log: " <<
+		name << ". Log: " <<
 		log.get() << std::endl;
 
 	// Clean up
@@ -134,24 +135,28 @@ auto Shader::build(
 
 
 // Use shader program
-auto Shader::use(
-	) const -> bool
+auto Shader::
+use(
+	) const
+	-> bool
 {
 	glUseProgram(program_);
 	auto program = GLint{};
 	glGetIntegerv(GL_CURRENT_PROGRAM, &program);
-	return program == program_;
+	return program && program == GLint(program_);
 }
 
 
 
 // Clean up
-auto Shader::clean(
-	) -> void
+auto Shader::
+clean(
+	)
+	-> void
 {
 	glUseProgram(0);
 
-	for (auto shader : shaders_)
+	for (auto const& shader : shaders_)
 		glDeleteShader(shader);
 	shaders_.clear();
 
@@ -162,10 +167,12 @@ auto Shader::clean(
 
 
 // Compile shader
-auto Shader::compile(
-	const GLenum&      type,
-	const std::string& code
-	) const -> GLuint
+auto Shader::
+compile(
+	GLenum             type,
+	std::string const& code
+	) const
+	-> GLuint
 {
 	// Shader type
 	auto shader_type = std::string{};
@@ -177,8 +184,8 @@ auto Shader::compile(
 	}
 
 	// Create shader ID and pass code pointer for compilation
-	const auto shader_code = code.c_str();
-	const auto shader      = glCreateShader(type);
+	auto const shader_code = code.c_str();
+	auto const shader      = glCreateShader(type);
 	glShaderSource(shader, 1, &shader_code, nullptr);
 	glCompileShader(shader);
 
@@ -193,11 +200,11 @@ auto Shader::compile(
 	auto log_length = GLint{};
 	glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &log_length);
 
-	const auto log = std::make_unique<char[]>(log_length);
+	auto const log = std::make_unique<char[]>(std::size_t(log_length));
 	glGetShaderInfoLog(shader, log_length, &log_length, log.get());
 
 	std::cerr << "ERROR: " <<
-		name_ << " " <<
+		name << " " <<
 		shader_type << " shader failed to compile. Log: " <<
 		log.get() << std::endl;
 

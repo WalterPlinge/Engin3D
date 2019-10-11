@@ -22,72 +22,84 @@ namespace ogl
 		// Program ID and list of shader IDs
 		GLuint              program_ = 0;
 		std::vector<GLuint> shaders_;
-		std::string         name_;
 
 	public:
+
+		std::string         name;
 
 		// Shader code as array of bool (is string filename) and code
 		using code_array = std::vector<std::pair<bool, std::string>>;
 
 		// Class
 		Shader(
-			) = default;
-		explicit Shader(
+			)
+			= default;
+
+		explicit
+		Shader(
 			std::string name
 			);
+
 		~Shader(
 			);
 
-		// Name
-		auto name(
-			) const -> std::string;
-		auto name(
-			const std::string& name
-			) -> void;
-
 		// Add shader type, providing code as string or filename
-		auto add(
-			const GLenum&      type,
-			const std::string& code,
-			const bool&        is_file = true
-			) -> void;
+		auto
+		add(
+			GLenum             type,
+			std::string const& code,
+			bool               is_file = true
+			)
+			-> void;
 
 		// Add shader type, proving code as strings or filenames
-		auto add(
-			const GLenum&     type,
-			const code_array& is_file_code
-			) -> void;
+		auto
+		add(
+			GLenum            type,
+			code_array const& is_file_code
+			)
+			-> void;
 
 		// Build program
-		auto build(
-			) -> bool;
+		auto
+		build(
+			)
+			-> bool;
 
 		// Use program
-		auto use(
-			) const -> bool;
+		auto
+		use(
+			) const
+			-> bool;
 
 		// Clean up
-		auto clean(
-			) -> void;
+		auto
+		clean(
+			)
+			-> void;
 
 	private:
 
 		// Compile shader
-		auto compile(
-			const GLenum&      type,
-			const std::string& code
-			) const -> GLuint;
+		auto
+		compile(
+			GLenum             type,
+			std::string const& code
+			) const
+			-> GLuint;
 
 	public:
 
 		// Bind value to named uniform in program
 		template<typename T>
-		auto bind(
-			const std::string& name,
-			const T&           value
-			) const -> void
+		auto
+		bind(
+			std::string const& uniform,
+			T                  value
+			) const
+			-> void
 		{
-			const auto location = glGetUniformLocation(program_, name.c_str());
+			auto const location = glGetUniformLocation(program_, uniform.c_str());
 
 			// Constexpr if allows branching to be removed at compile time
 			if constexpr (std::is_same<T, GLint>::value)
@@ -100,20 +112,22 @@ namespace ogl
 				glUniform1d(location, value);
 			else
 				std::cerr << "ERROR: Cannot bind uniform " <<
-					name << " to value of type " <<
+					uniform << " to value of type " <<
 					typeid(T).name() << " in shader " <<
-					name_ << std::endl;
+					name << std::endl;
 		}
 
 		// Bind value to named uniform in program
 		template<typename T>
-		auto bind(
-			const std::string& name,
-			const T*           value,
-			const GLsizei      count
-			) const -> void
+		auto
+		bind(
+			std::string const& uniform,
+			T           const* value,
+			GLsizei            count
+			) const
+			-> void
 		{
-			const auto location = glGetUniformLocation(program_, name.c_str());
+			auto const location = glGetUniformLocation(program_, uniform.c_str());
 
 			// Constexpr if allows branching to be removed at compile time
 			if constexpr (std::is_same<T, GLint>::value)
@@ -126,20 +140,22 @@ namespace ogl
 				glUniform1dv(location, count, value);
 			else
 				std::cerr << "ERROR: Cannot bind uniform " <<
-					name << " to value of type " <<
+					uniform << " to value of type " <<
 					typeid(T).name() << " in shader " <<
-					name_ << std::endl;
+					name << std::endl;
 		}
 
 		// Bind vector value to named uniform in program
 		template<glm::length_t L, typename T>
-		auto bind(
-			const std::string&    name,
-			const glm::vec<L, T>& value,
-			const GLsizei&        count = 1
-			) const -> void
+		auto
+		bind(
+			std::string    const& uniform,
+			glm::vec<L, T> const& value,
+			GLsizei               count = 1
+			) const
+			-> void
 		{
-			const auto location = glGetUniformLocation(program_, name.c_str());
+			auto const location = glGetUniformLocation(program_, uniform.c_str());
 
 			// Constexpr if allows branching to be removed at compile time
 			if constexpr (std::is_same<T, GLint>::value)
@@ -154,9 +170,9 @@ namespace ogl
 					glUniform4iv(location, count, glm::value_ptr(value));
 				else
 					std::cerr << "ERROR: Cannot bind uniform " <<
-						name << " to vector of length " <<
+						uniform << " to vector of length " <<
 						L << " in shader " <<
-						name_ << std::endl;
+						name << std::endl;
 			}
 			else if constexpr (std::is_same<T, GLuint>::value)
 			{
@@ -170,9 +186,9 @@ namespace ogl
 					glUniform4uiv(location, count, glm::value_ptr(value));
 				else
 					std::cerr << "ERROR: Cannot bind uniform " <<
-						name << " to vector of length " <<
+						uniform << " to vector of length " <<
 						L << " in shader " <<
-						name_ << std::endl;
+						name << std::endl;
 			}
 			else if constexpr (std::is_same<T, GLfloat>::value)
 			{
@@ -186,9 +202,9 @@ namespace ogl
 					glUniform4fv(location, count, glm::value_ptr(value));
 				else
 					std::cerr << "ERROR: Cannot bind uniform " <<
-						name << " to vector of length " <<
+						uniform << " to vector of length " <<
 						L << " in shader " <<
-						name_ << std::endl;
+						name << std::endl;
 			}
 			else if constexpr (std::is_same<T, GLdouble>::value)
 			{
@@ -202,28 +218,29 @@ namespace ogl
 					glUniform4dv(location, count, glm::value_ptr(value));
 				else
 					std::cerr << "ERROR: Cannot bind uniform " <<
-						name << " to vector of length " <<
+						uniform << " to vector of length " <<
 						L << " in shader " <<
-						name_ << std::endl;
+						name << std::endl;
 			}
 			else
 				std::cerr << "ERROR: Cannot bind uniform " <<
-					name << " to value of type " <<
+					uniform << " to value of type " <<
 					typeid(T).name() << " in shader " <<
-					name_ << std::endl;
+					name << std::endl;
 		}
 
 		// Bind matrix value to named uniform in program
 		template<glm::length_t C, glm::length_t R, typename T>
-		auto bind(
-			const std::string&       name,
-			const glm::mat<C, R, T>& value,
-			const GLsizei&           count     = 1,
-			const GLboolean&         transpose = GL_FALSE
-			) const -> void
+		auto
+		bind(
+			std::string       const& uniform,
+			glm::mat<C, R, T> const& value,
+			GLsizei                  count     = 1,
+			GLboolean                transpose = GL_FALSE
+			) const
+			-> void
 		{
-
-			const auto location = glGetUniformLocation(program_, name.c_str());
+			auto const location = glGetUniformLocation(program_, uniform.c_str());
 
 			// Constexpr allows branching to be removed at compile time
 			if constexpr (std::is_same<T, GLfloat>::value)
@@ -248,9 +265,9 @@ namespace ogl
 					glUniformMatrix4fv(location, count, transpose, glm::value_ptr(value));
 				else
 					std::cerr << "ERROR: Cannot bind uniform " <<
-						name << " to matrix size " <<
+						uniform << " to matrix size " <<
 						C << "x" << R << " in shader " <<
-						name_ << std::endl;
+						name << std::endl;
 			}
 			else if constexpr (std::is_same<T, GLdouble>::value)
 			{
@@ -274,15 +291,15 @@ namespace ogl
 					glUniformMatrix4dv(location, count, transpose, glm::value_ptr(value));
 				else
 					std::cerr << "ERROR: Cannot bind uniform " <<
-					name << " to matrix size " <<
+					uniform << " to matrix size " <<
 					C << "x" << R << " in shader " <<
-					name_ << std::endl;
+					name << std::endl;
 			}
 			else
 				std::cerr << "ERROR: Cannot bind uniform " <<
-					name << " to value of type " <<
+					uniform << " to value of type " <<
 					typeid(T).name() << " in shader " <<
-					name_ << std::endl;
+					name << std::endl;
 		}
 	};
 }

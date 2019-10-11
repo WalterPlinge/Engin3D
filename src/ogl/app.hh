@@ -1,94 +1,102 @@
-#ifndef OGL_APP_H
-#define OGL_APP_H
+#pragma once
 
-///////////////////////////////////////////////////////////////
-// HEADERS
+#include <array>
 
-// GLM
-#include <glm/vec2.hpp>
-
-// GLEW
-// ReSharper disable once CppUnusedIncludeDirective
+#define GLEW_STATIC
 #include <GL/glew.h>
 
-// GLFW
 #include <GLFW/glfw3.h>
 
-// Project
+#include <glm/vec2.hpp>
+#include <glm/vec4.hpp>
+
 #include "camera.hh"
 #include "mesh.hh"
 
-///////////////////////////////////////////////////////////////
-// RENDER NAMESPACE
 
-namespace ogl {
 
-	///////////////////////////////////////////////////////////
-	// APP CLASS
+namespace ogl::app
+{
 
-	class App {
-	public:
+// Keyboard array shorthand
+using keyboard_t = std::array<bool, GLFW_KEY_LAST>;
 
-		///////////////////////////////////////////////////////
-		// GETTERS
 
-		static Camera& get_camera();
 
-		///////////////////////////////////////////////////////
-		// INITIALISE
+// Camera
+Camera extern camera;
 
-		static void initialise_renderer();
 
-		///////////////////////////////////////////////////////
-		// UPDATE
 
-		static void update(const float& dt);
-		static bool key_pressed(const int& key);
-		static void show_fps(const float& newTime);
+// Initialise
+auto
+initialise_renderer(
+	)
+	-> void;
 
-		///////////////////////////////////////////////////////
-		// RENDER
 
-		static void clear();
-		static void draw(const Mesh& mesh);
-		static void display();
 
-		///////////////////////////////////////////////////////
-		// CLEANUP
+// Update
+auto
+update(
+	float delta_time
+	)
+	-> void;
 
-		static bool should_close();
-		static void close();
+auto
+show_fps(
+	float new_time
+	)
+	-> void;
 
-	private:
 
-		///////////////////////////////////////////////////////
-		// CALLBACK FUNCTIONS
 
-		static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
-		static void mouse_callback(GLFWwindow* window, double x_position, double y_position);
-		static void scroll_callback(GLFWwindow* window, double x_offset, double y_offset);
+// Render
+auto
+clear(
+	)
+	-> void;
 
-		///////////////////////////////////////////////////////
-		// ATTRIBUTES
+auto
+draw(
+	Mesh const& mesh
+	)
+	-> void;
 
-		// Window handle
-		static GLFWwindow* window_;
+auto
+display(
+	)
+	-> void;
 
-		// Camera
-		static Camera camera_;
 
-		// Dimensions
-		static constexpr unsigned height = 600;
-		static constexpr unsigned width = 800;
-		static int screen_height_;
-		static int screen_width_;
 
-		// Input
-		static bool first_mouse_;
-		static bool keyboard_[1024];
-		static glm::vec2 mouse_pos_;
-	};
+// Shutdown
+auto
+should_close(
+	)
+	-> bool;
 
-}
+auto
+close(
+	)
+	-> void;
 
-#endif
+
+
+// Utilities
+auto
+resolution(
+	)
+	-> glm::vec2;
+
+auto
+keyboard(
+	)
+	-> const keyboard_t&;
+
+auto
+mouse_pos(
+	)
+	-> glm::vec2;
+
+} // namespace ogl::app

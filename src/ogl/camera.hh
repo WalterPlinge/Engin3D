@@ -1,129 +1,203 @@
-#ifndef OGL_CAMERA_H
-#define OGL_CAMERA_H
 #pragma once
 
-///////////////////////////////////////////////////////////////
-// HEADERS
-
-// GLM
 #include <glm/mat4x4.hpp>
 #include <glm/vec3.hpp>
 
-///////////////////////////////////////////////////////////////
-// RENDER NAMESPACE
+namespace ogl
+{
 
-namespace ogl {
+class Camera
+{
+private:
 
-	///////////////////////////////////////////////////////////
-	// CAMERA CLASS
+	// World vectors
+	static const glm::vec3 world_right_;
+	static const glm::vec3 world_front_;
+	static const glm::vec3 world_up_;
 
-	class Camera {
-	public:
+	// Variables
+	glm::vec3 position_ = glm::vec3(0.0F);
 
-		///////////////////////////////////////////////////////
-		// DIRECTIONS OF MOVEMENT
+public:
 
-		enum class Move {
-			Right,
-			Left,
-			Forward,
-			Backward,
-			Up,
-			Down
-		};
+	float sensitivity = 0.25F;
+	float speed       = 10.0F;
+	bool  boost       = false;
 
-		///////////////////////////////////////////////////////
-		// CONSTRUCTOR
+private:
 
-		explicit Camera();
+	// Attributes
+	float fov_    = 45.0F;
+	float aspect_ = 1.0F;
+	float near_   = 0.01F;
+	float far_    = 100.0F;
 
-		///////////////////////////////////////////////////////
-		// GETTERS
+	// Angles
+	float pitch_ = 0.0F;
+	float roll_  = 0.0F;
+	float yaw_   = 0.0F;
 
-		// Variables
-		glm::vec3 get_position() const;
+	// Local vectors
+	glm::vec3 right_ = glm::vec3(1.0F, 0.0F, 0.0F);
+	glm::vec3 front_ = glm::vec3(0.0F, 1.0F, 0.0F);
+	glm::vec3 up_    = glm::vec3(0.0F, 0.0F, 1.0F);
 
-		// Matrices
-		glm::mat4 get_projection() const;
-		glm::mat4 get_view() const;
+	// Matrices
+	glm::mat4 projection_ = glm::mat4(1.0F);
+	glm::mat4 view_       = glm::mat4(1.0F);
 
-		///////////////////////////////////////////////////////
-		// SETTERS
+public:
 
-		// Variables
-		void set_position(const glm::vec3& position);
-		void set_sensitivity(const float& sensitivity);
-		void set_speed(const float& speed);
-		void set_boost(const bool& boost);
-
-		// Attributes
-		void set_fov(const float& fov);
-		void set_aspect(const float& width, const float& height);
-		void set_near(const float& near);
-		void set_far(const float& far);
-
-		// Angles
-		void set_pitch(const float& pitch);
-		void set_roll(const float& roll);
-		void set_yaw(const float& yaw);
-
-		///////////////////////////////////////////////////////
-		// MOVEMENT FUNCTIONS
-
-		// Orientation
-		void aim(const glm::vec2& look);
-		void aim(const glm::vec3& look);
-		void look_at(const glm::vec3& position);
-
-		// Position
-		void move(const Move& direction, const float& delta_time);
-
-		// Perspective
-		void zoom(const float& y_offset);
-		void zoom_reset();
-
-	private:
-
-		///////////////////////////////////////////////////////
-		// UPDATE FUNCTIONS
-
-		void update_vectors();
-		void update_matrices();
-
-		///////////////////////////////////////////////////////
-		// ATTRIBUTES
-
-		// Variables
-		glm::vec3 position_ = glm::vec3(0.0f);
-		float sensitivity_ = 0.25f;
-		float speed_ = 10.0f;
-		bool boost_ = false;
-
-		// Attributes
-		float fov_ = 45.0f;
-		float aspect_ = 1.0f;
-		float near_ = 0.01f;
-		float far_ = 100.0f;
-
-		// Angles
-		float pitch_ = 0.0f;
-		float roll_ = 0.0f;
-		float yaw_ = 0.0f;
-
-		// Local vectors
-		glm::vec3 right_ = glm::vec3(1.0f, 0.0f, 0.0f);
-		glm::vec3 front_ = glm::vec3(0.0f, 1.0f, 0.0f);
-		glm::vec3 up_ = glm::vec3(0.0f, 0.0f, 1.0f);
-
-		// World vectors
-		static const glm::vec3 world_right_;
-		static const glm::vec3 world_front_;
-		static const glm::vec3 world_up_;
-
-		// Matrices
-		glm::mat4 projection_ = glm::mat4(1.0f);
-		glm::mat4 view_ = glm::mat4(1.0f);
+	enum Move
+	{
+		Right,
+		Left,
+		Forward,
+		Backward,
+		Up,
+		Down
 	};
-}
 
-#endif
+
+
+	// Constructor
+	explicit
+	Camera(
+		);
+
+
+
+	// Position
+	auto
+	position(
+		) const
+		-> glm::vec3;
+
+	auto
+	position(
+		glm::vec3 p
+		)
+		-> void;
+
+
+
+	// Attributes
+	auto
+	fov(
+		float fov
+		)
+		-> void;
+
+	auto
+	aspect(
+		float width,
+		float height
+		)
+		-> void;
+
+	auto
+	near(
+		float near
+		)
+		-> void;
+
+	auto
+	far(
+		float far
+		)
+		-> void;
+
+
+
+	// Angles
+	auto
+	pitch(
+		float pitch
+		)
+		-> void;
+
+	auto
+	roll(
+		float roll
+		)
+		-> void;
+
+	auto
+	yaw(
+		float yaw
+		)
+		-> void;
+
+
+
+	// Matrices
+	auto
+	projection(
+		) const
+		-> glm::mat4;
+
+	auto
+	view(
+		) const
+		-> glm::mat4;
+
+
+
+	// Orientation
+	auto
+	aim(
+		glm::vec2 look
+		)
+		-> void;
+
+	auto
+	aim(
+		glm::vec3 look
+		)
+		-> void;
+
+	auto
+	look_at(
+		glm::vec3 position
+		)
+		-> void;
+
+
+
+	// Movement
+	auto
+	move(
+		Move  direction,
+		float delta_time
+		)
+		-> void;
+
+
+
+	// Perspective
+	auto
+	zoom(
+		float y_offset
+		)
+		-> void;
+
+	auto
+	zoom_reset(
+		)
+		-> void;
+
+private:
+
+	// Update
+	auto
+	update_vectors(
+		)
+		-> void;
+
+	auto
+	update_matrices(
+		)
+		-> void;
+};
+
+} // namespace ogl

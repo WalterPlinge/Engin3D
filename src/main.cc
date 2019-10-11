@@ -1,59 +1,46 @@
-///////////////////////////////////////////////////////////////
-// HEADERS
-
-// STD
 #include <iostream>
 
-// GLEW
 #include <GL/glew.h>
 
-// GLFW
 #include <GLFW/glfw3.h>
 
-// GLM
 #include <glm/glm.hpp>
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/ext.hpp>
 
-// Project
 #include "ogl/app.hh"
-using ogl::App;
 
-///////////////////////////////////////////////////////////////
-// PROGRAM ENTRY
 
-int main() {
 
-	////////////////////////////////////////////////////////////
-	// TEST AREA
+using namespace ogl;
 
-	// TEST CAMEERA
-	// TEST SHADER
-	// TEST OBJ
-	// TEST MESH
-	// TEST APP
 
-	////////////////////////////////////////////////////////////
+
+auto
+main(
+	)
+	-> int
+{
 	// Application setup
 
-	App::initialise_renderer();
-///	App::get_camera() = glm::vec3(0.0f);
+	app::initialise_renderer();
+	app::camera.position(glm::vec3(-5.0F));
+	app::camera.look_at(glm::vec3(0.0F));
 
-	////////////////////////////////////////////////////////////
 	// Generate shader
-
-///	const Shader red("resources/shaders/solid.vert", "resources/shaders/solid_red.frag");
-///	const Shader green("resources/shaders/solid.vert", "resources/shaders/solid_green.frag");
-///	const Shader lambert("resources/shaders/lambert.vert", "resources/shaders/lambert.frag");
-///	const Shader stripe("resources/shaders/stripe.vert", "resources/shaders/stripe.frag");
+	auto shader = ogl::Shader();
+	shader.name = "basic shader";
+	shader.add(GL_VERTEX_SHADER, "res/shaders/solid.vert");
+	shader.add(GL_FRAGMENT_SHADER, "res/shaders/solid_green.frag");
+	shader.build();
 
 	////////////////////////////////////////////////////////////
 	// Mesh
 
-///	Mesh ground;
-///	ground.SetPos(glm::vec3(15.0f, 0.0f, 15.0f));
-///	ground.Scale(glm::vec3(15.0f));
-///	ground.shader = green;
+	auto ground = ogl::Mesh();
+//	ground.position(glm::vec3(15.0f, 0.0f, 15.0f));
+//	ground.scale(glm::vec3(15.0f));
+	ground.shader = shader;
 ///	Mesh sphereMesh("resources/models/sphere.obj");
 ///	sphereMesh.shader = stripe;
 
@@ -64,52 +51,52 @@ int main() {
 	////////////////////////////////////////////////////////////
 	// Time variables
 
-	float time(0.0f);
-	float accumulator(0.0f);
-	constexpr float framerate(60.0f);
-	const float	deltaTime(1.0f / framerate);
-	float currentTime(glfwGetTime());
+	auto           time        = 0.0F;
+	auto           accumulator = 0.0F;
+	auto constexpr framerate   = 60.0F;
+	auto const     delta_time   = 1.0F / framerate;
+	auto           current_time = float(glfwGetTime());
 
 	////////////////////////////////////////////////////////////
 	// Application loop
 
-	while (!App::should_close()) {
-		
+	while (!app::should_close()) {
+
 		// Update time
-		const float newTime(glfwGetTime());
-		const float frameTime(newTime - currentTime);
-		currentTime = newTime;
-		accumulator += frameTime;
+		auto       new_time  = float(glfwGetTime());
+		auto const frameTime = new_time - current_time;
+		current_time         = new_time;
+		accumulator         += frameTime;
 
 		/////////////////////////////////////////////////////////
 		// Application update
 
-		App::update(frameTime);
-		App::show_fps(newTime);
+		app::update(frameTime);
+		app::show_fps(new_time);
 
 		/////////////////////////////////////////////////////////
 		// Physics
 
-		while (accumulator >= deltaTime) {
+		while (accumulator >= delta_time) {
 
 			//////////////////////////////////////////////////////
 			// Time
 
-			accumulator -= deltaTime;
-			time += deltaTime;
+			accumulator -= delta_time;
+			time        += delta_time;
 		}
 
 		/////////////////////////////////////////////////////////
 		// Render
 
-		App::clear();
-///		App::draw(ground);
-		App::display();
+		app::clear();
+		app::draw(ground);
+		app::display();
 	}
 
 	////////////////////////////////////////////////////////////
 	// Close app
 
-	App::close();
+	app::close();
 	exit(EXIT_SUCCESS);
 }
