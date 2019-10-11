@@ -24,7 +24,7 @@ main(
 	// Application setup
 
 	app::initialise_renderer();
-	app::camera.position(glm::vec3(-5.0F));
+	app::camera.position(glm::vec3(5.0F));
 	app::camera.look_at(glm::vec3(0.0F));
 
 	// Generate shader

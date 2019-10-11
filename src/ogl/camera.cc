@@ -229,22 +229,22 @@ move(
 
 	// Translate position by coresponding vector scaled by speed
 	if (direction == Right)
-		position(right_ * velocity);
+		position(position_ + right_ * velocity);
 
 	else if (direction == Left)
-		position(-right_ * velocity);
+		position(position_ - right_ * velocity);
 
 	else if (direction == Forward)
-		position(front_ * velocity);
+		position(position_ + front_ * velocity);
 
 	else if (direction == Backward)
-		position(-front_ * velocity);
+		position(position_ - front_ * velocity);
 
 	else if (direction == Up)
-		position(up_ * velocity);
+		position(position_ + up_ * velocity);
 
 	else if (direction == Down)
-		position(-up_ * velocity);
+		position(position_ - up_ * velocity);
 
 	update_matrices();
 }

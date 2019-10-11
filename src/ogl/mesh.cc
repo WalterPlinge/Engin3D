@@ -388,21 +388,33 @@ initialise_mesh(
 	// Create vertex buffer, bind to location 0
 	glGenBuffers(1, &vbo_);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo_);
-	glBufferData(GL_ARRAY_BUFFER, size_ * sizeof positions.front(), positions.data(), GL_STATIC_DRAW);
+	glBufferData(
+		GL_ARRAY_BUFFER,
+		size_ * sizeof(positions.front()),
+		positions.data(),
+		GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
 	// Create normal buffer, bind to location 1
 	glGenBuffers(1, &nbo_);
 	glBindBuffer(GL_ARRAY_BUFFER, nbo_);
-	glBufferData(GL_ARRAY_BUFFER, size_ * sizeof normals.front(), normals.data(), GL_STATIC_DRAW);
+	glBufferData(
+		GL_ARRAY_BUFFER,
+		size_ * sizeof(normals.front()),
+		normals.data(),
+		GL_STATIC_DRAW);
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
 	// Create uv buffer, bind to location 2
 	glGenBuffers(1, &ubo_);
 	glBindBuffer(GL_ARRAY_BUFFER, ubo_);
-	glBufferData(GL_ARRAY_BUFFER, size_ * sizeof uvs.front(), uvs.data(), GL_STATIC_DRAW);
+	glBufferData(
+		GL_ARRAY_BUFFER,
+		size_ * sizeof(uvs.front()),
+		uvs.data(),
+		GL_STATIC_DRAW);
 	glEnableVertexAttribArray(2);
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
 

@@ -150,7 +150,7 @@ initialise_renderer(
 	glfwSetWindowSizeCallback(window_, window_size_callback);
 
 	// Remove mouse cursor
-	//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	//glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 
 
