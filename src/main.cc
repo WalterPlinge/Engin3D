@@ -24,7 +24,7 @@ main(
 	// Application setup
 
 	app::initialise_renderer();
-	app::camera.position = glm::vec3(0.0F, -20.0F, 5.0F);
+	app::camera.position = glm::vec3(0.0F, 20.0F, 5.0F);
 	app::camera.look_at(glm::vec3(0.0F));
 	app::camera.sensitivity = 0.001F;
 
@@ -91,9 +91,9 @@ main(
 
 		// Render
 		app::clear();
-		app::draw(ground);
-		app::draw(cube);
 		app::draw(sphere);
+		app::draw(cube);
+		app::draw(ground);
 		app::display();
 	}
 

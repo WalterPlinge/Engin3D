@@ -195,7 +195,7 @@ Mesh(
 		size_ = 36;
 	}
 
-	obj::Mesh mesh;
+	auto mesh = obj::Mesh();
 	for (auto i = 0; i < size_; ++i)
 	{
 		auto v = obj::Vertex();
@@ -368,12 +368,14 @@ initialise_mesh(
 	)
 	-> void
 {
+	size_ = mesh.vertices.size();
+
 	// Get positions and normals
 	auto positions = std::vector<glm::vec3>();
 	auto normals = std::vector<glm::vec3>();
 
-	positions.reserve(mesh.vertices.size());
-	normals.reserve(mesh.vertices.size());
+	positions.reserve(size_);
+	normals.reserve(size_);
 
 	for (auto const& v : mesh.vertices)
 	{
