@@ -25,7 +25,6 @@ namespace obj {
 		glm::vec3 position = glm::vec3(0.0f);
 		glm::vec3 normal   = glm::vec3(0.0f);
 		glm::vec2 uv       = glm::vec2(0.0f);
-		bool operator==(Vertex const& other) { return position == other.position && normal == other.normal && uv == other.uv; }
 	};
 
 	///////////////////////////////////////////////////////////

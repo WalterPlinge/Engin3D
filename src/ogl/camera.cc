@@ -11,13 +11,13 @@
 namespace ogl
 {
 
-auto const Camera::world_right_ = glm::vec3(1.0F, 0.0F, 0.0F);
-auto const Camera::world_front_ = glm::vec3(0.0F, 1.0F, 0.0F);
-auto const Camera::world_up_    = glm::vec3(0.0F, 0.0F, 1.0F);
+glm::vec3 const Camera::world_right_ = glm::vec3(1.0F, 0.0F, 0.0F);
+glm::vec3 const Camera::world_front_ = glm::vec3(0.0F, 1.0F, 0.0F);
+glm::vec3 const Camera::world_up_    = glm::vec3(0.0F, 0.0F, 1.0F);
 
 
 
-//
+// Constructor
 Camera::Camera()
 {
 	// Keep camera updated
@@ -26,100 +26,15 @@ Camera::Camera()
 
 
 
-// Position
-auto Camera::
-position(
-	) const
-	-> glm::vec3
-{
-	return position_;
-}
-
-auto Camera::
-position(
-	glm::vec3 position
-	)
-	-> void
-{
-	position_ = position;
-	update_matrices();
-}
-
-
-
 // Attributes
 auto Camera::
-fov(
-	float fov
-	)
-	-> void
-{
-	fov_ = fov;
-	update_matrices();
-}
-
-auto Camera::
 aspect(
-	float width,
-	float height
+	float const width,
+	float const height
 	)
 	-> void
 {
 	aspect_ = width / height;
-	update_matrices();
-}
-
-auto Camera::
-near(
-	float near
-	)
-	-> void
-{
-	near_ = near;
-	update_matrices();
-}
-
-auto Camera::
-far(
-	float far
-	)
-	-> void
-{
-	far_ = far;
-	update_matrices();
-}
-
-
-
-// Angles
-auto Camera::
-pitch(
-	float pitch
-	)
-	-> void
-{
-	pitch_ = glm::radians(pitch);
-	update_vectors();
-}
-
-auto Camera::
-roll(
-	float roll
-	)
-	-> void
-{
-	roll_ = glm::radians(roll);
-	update_vectors();
-}
-
-auto Camera::
-yaw(
-	float yaw
-	)
-	-> void
-{
-	yaw_ = glm::radians(yaw);
-	update_vectors();
 }
 
 
@@ -130,7 +45,7 @@ projection(
 	) const
 	-> glm::mat4
 {
-	return projection_;
+	return glm::perspective(glm::radians(fov), aspect_, near, far);
 }
 
 auto Camera::
@@ -138,7 +53,7 @@ view(
 	) const
 	-> glm::mat4
 {
-	return view_;
+	return glm::lookAt(position, position + front_, up_);
 }
 
 
@@ -146,14 +61,14 @@ view(
 // Orientation
 auto Camera::
 aim(
-	glm::vec2 look
+	glm::vec2 const look
 	)
 	-> void
 {
 	// Update pitch and yaw by look vector scaled by sensitivity
 	auto const update = look * sensitivity;
-	pitch_           += update.x;
-	yaw_             += update.y;
+	pitch_           += update.y;
+	yaw_             += update.x;
 
 	// Keep pitch within bounds
 	auto const bounds =
@@ -164,49 +79,21 @@ aim(
 		pitch_ = bounds;
 	else if (pitch_ < -bounds)
 		pitch_ = -bounds;
-}
-
-auto Camera::
-aim(
-	glm::vec3 look
-	)
-	-> void
-{
-	// Update pitch, roll and yaw by look vector scaled by sensitivity
-	auto const update = look * sensitivity;
-	pitch_           += update.x;
-	roll_            += update.y;
-	yaw_             += update.z;
-
-	// Keep pitch and roll within bounds
-	auto const bounds =
-		glm::half_pi<float>()
-		- std::numeric_limits<float>::min();
-
-	if (pitch_ > bounds)
-		pitch_ = bounds;
-	else if (pitch_ < -bounds)
-		pitch_ = -bounds;
-
-	if (roll_ > bounds)
-		roll_ = bounds;
-	else if (roll_ < -bounds)
-		roll_ = -bounds;
 
 	update_vectors();
 }
 
 auto Camera::
 look_at(
-	glm::vec3 position
+	glm::vec3 const point
 	)
 	-> void
 {
 	// New front vector
-	auto const front = glm::normalize(position - position_);
+	auto const front = glm::normalize(point - position);
 
 	// Get pitch and yaw from new front vector
-	pitch_ = std::asin(-front.z);
+	pitch_ = std::asin(front.z);
 	yaw_   = std::atan2(front.x, front.y);
 
 	update_vectors();
@@ -217,8 +104,8 @@ look_at(
 // Movement
 auto Camera::
 move(
-	Move  direction,
-	float delta_time
+	Move  const direction,
+	float const delta_time
 	)
 	-> void
 {
@@ -229,24 +116,22 @@ move(
 
 	// Translate position by coresponding vector scaled by speed
 	if (direction == Right)
-		position(position_ + right_ * velocity);
+		position += right_ * velocity;
 
 	else if (direction == Left)
-		position(position_ - right_ * velocity);
+		position -= right_ * velocity;
 
 	else if (direction == Forward)
-		position(position_ + front_ * velocity);
+		position += front_ * velocity;
 
 	else if (direction == Backward)
-		position(position_ - front_ * velocity);
+		position -= front_ * velocity;
 
 	else if (direction == Up)
-		position(position_ + up_ * velocity);
+		position += up_ * velocity;
 
 	else if (direction == Down)
-		position(position_ - up_ * velocity);
-
-	update_matrices();
+		position -= up_ * velocity;
 }
 
 
@@ -254,24 +139,21 @@ move(
 // Perspective
 auto Camera::
 zoom(
-	float y_offset
+	float const y_offset
 	)
 	-> void
 {
-	// Increment or decrement zoom based on
+	// Increment or decrement zoom based on y_offset sign
 	if (y_offset > 0.0F)
-		fov_ -= 0.1F;
+		fov -= 1.0F;
 	else
-		fov_ += 0.1F;
+		fov += 1.0F;
 
 	// Keep zoom within reasonable bounds
-	if (fov_ < 44.0F)
-		fov_ = 44.0F;
-	else if (fov_ > 46.0F)
-		fov_ = 46.0F;
-
-	// Keep camera updated
-	update_matrices();
+	if (fov < 20.0F)
+		fov = 20.0F;
+	else if (fov > 90.0F)
+		fov = 90.0F;
 }
 
 auto Camera::
@@ -279,10 +161,7 @@ zoom_reset(
 	)
 	-> void
 {
-	fov_ = 45.0F;
-
-	// Keep camera updated
-	update_matrices();
+	fov = 45.0F;
 }
 
 
@@ -293,6 +172,16 @@ update_vectors(
 	)
 	-> void
 {
+	auto front = glm::vec3();
+	front.x    = glm::sin(yaw_) * glm::cos(pitch_);
+	front.y    = glm::cos(yaw_) * glm::cos(pitch_);
+	front.z    = glm::sin(pitch_);
+
+	front_ = glm::normalize(front);
+	right_ = glm::normalize(glm::cross(front_, world_up_));
+	up_    = glm::normalize(glm::cross(right_, front_));
+
+	/*
 	// Calculate rotation matrix from euler angles
 	auto const rotation = glm::eulerAngleXYZ(pitch_, roll_, yaw_);
 
@@ -303,6 +192,7 @@ update_vectors(
 
 	// Keep camera updated
 	update_matrices();
+	*/
 
 	/*
 	// Calculate front using euler angles
@@ -322,16 +212,6 @@ update_vectors(
 	// Calculate up using right and front
 	up_ = glm::normalize(glm::cross(right_, front_));
 	*/
-}
-
-// Matrices
-auto Camera::
-update_matrices(
-	)
-	-> void
-{
-	view_       = glm::lookAt(position_, position_ + front_, up_);
-	projection_ = glm::perspective(fov_, aspect_, near_, far_);
 }
 
 } // namespace ogl

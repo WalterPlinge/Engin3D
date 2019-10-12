@@ -12,7 +12,7 @@ namespace ogl::app
 {
 
 // Camera
-auto camera = Camera();
+Camera camera;
 
 // Window handle
 GLFWwindow static* window_ = nullptr;
@@ -26,7 +26,7 @@ auto static           screen_height_ = 0;
 // Input
 auto static first_mouse_ = true;
 auto static mouse_pos_   = glm::vec2();
-auto static keyboard_    = app::keyboard_t{ false };
+auto static keyboard_    = keyboard_t{ false };
 
 
 
@@ -45,14 +45,17 @@ key_callback(
 	if (key != GLFW_KEY_UNKNOWN)
 	{
 		if (action == GLFW_PRESS)
+		{
 			keyboard_[std::size_t(key)] = true;
+
+			// Close window
+			if (key == GLFW_KEY_ESCAPE)
+				glfwSetWindowShouldClose(window, GL_TRUE);
+		}
+
 		else if (action == GLFW_RELEASE)
 			keyboard_[std::size_t(key)] = false;
 	}
-
-	// Close window
-	if (keyboard_[GLFW_KEY_ESCAPE])
-		glfwSetWindowShouldClose(window, GL_TRUE);
 }
 
 auto static
@@ -150,7 +153,7 @@ initialise_renderer(
 	glfwSetWindowSizeCallback(window_, window_size_callback);
 
 	// Remove mouse cursor
-	//glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 
 
@@ -169,7 +172,6 @@ initialise_renderer(
 
 	// Set up some other opengl options
 	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -191,22 +193,22 @@ update(
 	camera.boost = keyboard_[GLFW_KEY_LEFT_CONTROL];
 
 	if (keyboard_[GLFW_KEY_W])
-		camera.move(Camera::Move::Forward, delta_time);
+		camera.move(Camera::Forward, delta_time);
 
 	if (keyboard_[GLFW_KEY_A])
-		camera.move(Camera::Move::Left, delta_time);
+		camera.move(Camera::Left, delta_time);
 
 	if (keyboard_[GLFW_KEY_S])
-		camera.move(Camera::Move::Backward, delta_time);
+		camera.move(Camera::Backward, delta_time);
 
 	if (keyboard_[GLFW_KEY_D])
-		camera.move(Camera::Move::Right, delta_time);
+		camera.move(Camera::Right, delta_time);
 
 	if (keyboard_[GLFW_KEY_SPACE])
-		camera.move(Camera::Move::Up, delta_time);
+		camera.move(Camera::Up, delta_time);
 
 	if (keyboard_[GLFW_KEY_LEFT_SHIFT])
-		camera.move(Camera::Move::Down, delta_time);
+		camera.move(Camera::Down, delta_time);
 
 	if (keyboard_[GLFW_KEY_Z])
 		camera.zoom_reset();
@@ -255,7 +257,7 @@ clear(
 	)
 	-> void
 {
-	glClearColor(1.0F, 0.0F, 0.0F, 1.0F);
+	glClearColor(0.2F, 0.3F, 0.3F, 1.0F);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
@@ -265,20 +267,20 @@ draw(
 	)
 	-> void
 {
-	auto const& shader = mesh.shader;
+	auto const* const shader = mesh.shader.get();
 
-	if (!shader.use())
+	if (!shader->use())
 		return;
 
-	shader.bind("translate", mesh.translate());
-	shader.bind("rotate", mesh.rotate());
-	shader.bind("scale", mesh.scale());
+	shader->bind("translate", mesh.translate());
+	shader->bind("rotate", mesh.rotate());
+	shader->bind("scale", mesh.scale());
 
-	shader.bind("view", camera.view());
-	shader.bind("projection", camera.projection());
+	shader->bind("view", camera.view());
+	shader->bind("projection", camera.projection());
 
 	glBindVertexArray(mesh.vao());
-	glDrawArrays(GL_TRIANGLES, 0, GLsizei(mesh.size()));
+	glDrawArrays(GL_TRIANGLES, 0, mesh.size());
 
 	glBindVertexArray(0);
 }

@@ -1,6 +1,5 @@
 #pragma once
 
-// STD
 #include <array>
 #include <iostream>
 #include <string>
@@ -8,11 +7,9 @@
 #include <utility>
 #include <vector>
 
-// GLEW
 #define GLEW_STATIC
 #include <GL/glew.h>
 
-// GLM
 #include <glm/gtc/type_ptr.hpp>
 
 namespace ogl

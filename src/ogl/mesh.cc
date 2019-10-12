@@ -11,6 +11,28 @@
 namespace ogl
 {
 
+// Vertex operations
+auto
+calculate_dimensions(
+	std::vector<obj::Vertex> const& vertices
+	)
+	-> glm::vec3
+{
+	auto max = vertices.front().position;
+	auto min = vertices.front().position;
+
+	for (auto const& vertex : vertices)
+		for (auto i = 0; i < 3; ++i)
+			if (vertex.position[i] < min[i])
+				min[i] = vertex.position[i];
+			else if (vertex.position[i] > max[i])
+				max[i] = vertex.position[i];
+
+	return max - min;
+}
+
+
+
 Mesh::
 Mesh(
 	std::string const& file
@@ -22,32 +44,25 @@ Mesh(
 
 Mesh::
 Mesh(
-	Type type
+	Type const type
 	)
 {
 	auto positions = std::vector<glm::vec3>();
 	auto normals   = std::vector<glm::vec3>();
-	auto uvs       = std::vector<glm::vec2>();
 
 	// Calculate data for type
 	if (type == Triangle)
 	{
 		positions = {
-			glm::vec3(0.75f, 0.0F, -0.5f),
-			glm::vec3(0.0F, 0.0F, 1.0F),
-			glm::vec3(-0.75f, 0.0F, -0.5f)
+			glm::vec3( 0.0F, 0.0F,  1.0F),
+			glm::vec3(-1.0F, 0.0F, -1.0F),
+			glm::vec3( 1.0F, 0.0F, -1.0F)
 		};
 
 		normals = {
 			glm::vec3(0.0F, -1.0F, 0.0F),
 			glm::vec3(0.0F, -1.0F, 0.0F),
 			glm::vec3(0.0F, -1.0F, 0.0F)
-		};
-
-		uvs = {
-			glm::vec2(1.0F, 0.0F),
-			glm::vec2(0.5f, 1.0F),
-			glm::vec2(0.0F, 0.0F)
 		};
 
 		size_ = 3;
@@ -55,30 +70,21 @@ Mesh(
 	else if (type == Quad)
 	{
 		positions = {
-			glm::vec3(-0.5f, 0.0F, -0.5f),
-			glm::vec3(0.5f, 0.0F, -0.5f),
-			glm::vec3(-0.5f, 0.0F, 0.5f),
-			glm::vec3(0.5f, 0.0F, -0.5f),
-			glm::vec3(-0.5f, 0.0F, 0.5f),
-			glm::vec3(0.5f, 0.0F, 0.5f)
+			glm::vec3( 1.0F,  1.0F, 0.0F),
+			glm::vec3(-1.0F,  1.0F, 0.0F),
+			glm::vec3(-1.0F, -1.0F, 0.0F),
+			glm::vec3(-1.0F, -1.0F, 0.0F),
+			glm::vec3( 1.0F, -1.0F, 0.0F),
+			glm::vec3( 1.0F,  1.0F, 0.0F),
 		};
 
 		normals = {
-			glm::vec3(0.0F, -1.0F, 0.0F),
-			glm::vec3(0.0F, -1.0F, 0.0F),
-			glm::vec3(0.0F, -1.0F, 0.0F),
-			glm::vec3(0.0F, -1.0F, 0.0F),
-			glm::vec3(0.0F, -1.0F, 0.0F),
-			glm::vec3(0.0F, -1.0F, 0.0F)
-		};
-
-		uvs = {
-			glm::vec2(0.0F, 0.0F),
-			glm::vec2(1.0F, 0.0F),
-			glm::vec2(0.0F, 1.0F),
-			glm::vec2(1.0F, 0.0F),
-			glm::vec2(0.0F, 1.0F),
-			glm::vec2(1.0F, 1.0F)
+			glm::vec3(0.0F, 0.0F, 1.0F),
+			glm::vec3(0.0F, 0.0F, 1.0F),
+			glm::vec3(0.0F, 0.0F, 1.0F),
+			glm::vec3(0.0F, 0.0F, 1.0F),
+			glm::vec3(0.0F, 0.0F, 1.0F),
+			glm::vec3(0.0F, 0.0F, 1.0F)
 		};
 
 		size_ = 6;
@@ -86,89 +92,117 @@ Mesh(
 	else if (type == Cube)
 	{
 		positions = {
-			glm::vec3(-1.0F, -1.0F, -1.0F),
+			// RIGHT
+			glm::vec3(1.0F,  1.0F,  1.0F),
+			glm::vec3(1.0F, -1.0F,  1.0F),
 			glm::vec3(1.0F, -1.0F, -1.0F),
-			glm::vec3(1.0F, 1.0F, -1.0F),
-			glm::vec3(-1.0F, -1.0F, -1.0F),
-			glm::vec3(1.0F, 1.0F, -1.0F),
-			glm::vec3(-1.0F, 1.0F, -1.0F),
-			glm::vec3(-1.0F, -1.0F, 1.0F),
-			glm::vec3(1.0F, -1.0F, 1.0F),
-			glm::vec3(1.0F, 1.0F, 1.0F),
-			glm::vec3(-1.0F, -1.0F, 1.0F),
-			glm::vec3(1.0F, 1.0F, 1.0F),
-			glm::vec3(-1.0F, 1.0F, 1.0F),
-			glm::vec3(-1.0F, -1.0F, -1.0F),
 			glm::vec3(1.0F, -1.0F, -1.0F),
-			glm::vec3(1.0F, -1.0F, 1.0F),
-			glm::vec3(-1.0F, -1.0F, -1.0F),
-			glm::vec3(1.0F, -1.0F, 1.0F),
+			glm::vec3(1.0F,  1.0F, -1.0F),
+			glm::vec3(1.0F,  1.0F,  1.0F),
+
+			// BACK
+			glm::vec3( 1.0F, 1.0F,  1.0F),
+			glm::vec3( 1.0F, 1.0F, -1.0F),
+			glm::vec3(-1.0F, 1.0F, -1.0F),
+			glm::vec3(-1.0F, 1.0F, -1.0F),
+			glm::vec3(-1.0F, 1.0F,  1.0F),
+			glm::vec3( 1.0F, 1.0F,  1.0F),
+
+			// TOP
+			glm::vec3( 1.0F,  1.0F, 1.0F),
+			glm::vec3(-1.0F,  1.0F, 1.0F),
 			glm::vec3(-1.0F, -1.0F, 1.0F),
-			glm::vec3(-1.0F, 1.0F, -1.0F),
-			glm::vec3(1.0F, 1.0F, -1.0F),
-			glm::vec3(1.0F, 1.0F, 1.0F),
-			glm::vec3(-1.0F, 1.0F, -1.0F),
-			glm::vec3(1.0F, 1.0F, 1.0F),
-			glm::vec3(-1.0F, 1.0F, 1.0F),
-			glm::vec3(-1.0F, -1.0F, -1.0F),
-			glm::vec3(-1.0F, 1.0F, -1.0F),
-			glm::vec3(-1.0F, 1.0F, 1.0F),
-			glm::vec3(-1.0F, -1.0F, -1.0F),
-			glm::vec3(-1.0F, 1.0F, 1.0F),
 			glm::vec3(-1.0F, -1.0F, 1.0F),
-			glm::vec3(1.0F, -1.0F, -1.0F),
-			glm::vec3(1.0F, 1.0F, -1.0F),
-			glm::vec3(1.0F, 1.0F, 1.0F),
-			glm::vec3(1.0F, -1.0F, -1.0F),
-			glm::vec3(1.0F, 1.0F, 1.0F),
-			glm::vec3(1.0F, -1.0F, 1.0F)
+			glm::vec3( 1.0F, -1.0F, 1.0F),
+			glm::vec3( 1.0F,  1.0F, 1.0F),
+
+			// LEFT
+			glm::vec3(-1.0F,  1.0F,  1.0F),
+			glm::vec3(-1.0F,  1.0F, -1.0F),
+			glm::vec3(-1.0F, -1.0F, -1.0F),
+			glm::vec3(-1.0F, -1.0F, -1.0F),
+			glm::vec3(-1.0F, -1.0F,  1.0F),
+			glm::vec3(-1.0F,  1.0F,  1.0F),
+
+			// FRONT
+			glm::vec3( 1.0F, -1.0F,  1.0F),
+			glm::vec3(-1.0F, -1.0F,  1.0F),
+			glm::vec3(-1.0F, -1.0F, -1.0F),
+			glm::vec3(-1.0F, -1.0F, -1.0F),
+			glm::vec3( 1.0F, -1.0F, -1.0F),
+			glm::vec3( 1.0F, -1.0F,  1.0F),
+
+			// BOTTOM
+			glm::vec3( 1.0F,  1.0F, -1.0F),
+			glm::vec3( 1.0F, -1.0F, -1.0F),
+			glm::vec3(-1.0F, -1.0F, -1.0F),
+			glm::vec3(-1.0F, -1.0F, -1.0F),
+			glm::vec3(-1.0F,  1.0F, -1.0F),
+			glm::vec3( 1.0F,  1.0F, -1.0F)
 		};
 
 		normals = {
-			glm::vec3(0.0F, 0.0F, -1.0F),
-			glm::vec3(0.0F, 0.0F, -1.0F),
-			glm::vec3(0.0F, 0.0F, -1.0F),
-			glm::vec3(0.0F, 0.0F, -1.0F),
-			glm::vec3(0.0F, 0.0F, -1.0F),
-			glm::vec3(0.0F, 0.0F, -1.0F),
-			glm::vec3(0.0F, 0.0F, 1.0F),
-			glm::vec3(0.0F, 0.0F, 1.0F),
-			glm::vec3(0.0F, 0.0F, 1.0F),
-			glm::vec3(0.0F, 0.0F, 1.0F),
-			glm::vec3(0.0F, 0.0F, 1.0F),
-			glm::vec3(0.0F, 0.0F, 1.0F),
-			glm::vec3(0.0F, -1.0F, 0.0F),
-			glm::vec3(0.0F, -1.0F, 0.0F),
-			glm::vec3(0.0F, -1.0F, 0.0F),
-			glm::vec3(0.0F, -1.0F, 0.0F),
-			glm::vec3(0.0F, -1.0F, 0.0F),
-			glm::vec3(0.0F, -1.0F, 0.0F),
-			glm::vec3(0.0F, 1.0F, 0.0F),
-			glm::vec3(0.0F, 1.0F, 0.0F),
-			glm::vec3(0.0F, 1.0F, 0.0F),
-			glm::vec3(0.0F, 1.0F, 0.0F),
-			glm::vec3(0.0F, 1.0F, 0.0F),
-			glm::vec3(0.0F, 1.0F, 0.0F),
-			glm::vec3(-1.0F, 0.0F, 0.0F),
-			glm::vec3(-1.0F, 0.0F, 0.0F),
-			glm::vec3(-1.0F, 0.0F, 0.0F),
-			glm::vec3(-1.0F, 0.0F, 0.0F),
-			glm::vec3(-1.0F, 0.0F, 0.0F),
-			glm::vec3(-1.0F, 0.0F, 0.0F),
+			// RIGHT
 			glm::vec3(1.0F, 0.0F, 0.0F),
 			glm::vec3(1.0F, 0.0F, 0.0F),
 			glm::vec3(1.0F, 0.0F, 0.0F),
 			glm::vec3(1.0F, 0.0F, 0.0F),
 			glm::vec3(1.0F, 0.0F, 0.0F),
-			glm::vec3(1.0F, 0.0F, 0.0F)
+			glm::vec3(1.0F, 0.0F, 0.0F),
+
+			// BACK
+			glm::vec3(0.0F, 1.0F, 0.0F),
+			glm::vec3(0.0F, 1.0F, 0.0F),
+			glm::vec3(0.0F, 1.0F, 0.0F),
+			glm::vec3(0.0F, 1.0F, 0.0F),
+			glm::vec3(0.0F, 1.0F, 0.0F),
+			glm::vec3(0.0F, 1.0F, 0.0F),
+
+			// TOP
+			glm::vec3(0.0F, 0.0F, 1.0F),
+			glm::vec3(0.0F, 0.0F, 1.0F),
+			glm::vec3(0.0F, 0.0F, 1.0F),
+			glm::vec3(0.0F, 0.0F, 1.0F),
+			glm::vec3(0.0F, 0.0F, 1.0F),
+			glm::vec3(0.0F, 0.0F, 1.0F),
+
+			// LEFT
+			glm::vec3(-1.0F, 0.0F, 0.0F),
+			glm::vec3(-1.0F, 0.0F, 0.0F),
+			glm::vec3(-1.0F, 0.0F, 0.0F),
+			glm::vec3(-1.0F, 0.0F, 0.0F),
+			glm::vec3(-1.0F, 0.0F, 0.0F),
+			glm::vec3(-1.0F, 0.0F, 0.0F),
+
+			// FRONT
+			glm::vec3(0.0F, -1.0F, 0.0F),
+			glm::vec3(0.0F, -1.0F, 0.0F),
+			glm::vec3(0.0F, -1.0F, 0.0F),
+			glm::vec3(0.0F, -1.0F, 0.0F),
+			glm::vec3(0.0F, -1.0F, 0.0F),
+			glm::vec3(0.0F, -1.0F, 0.0F),
+
+			// BOTTOM
+			glm::vec3(0.0F, 0.0F, -1.0F),
+			glm::vec3(0.0F, 0.0F, -1.0F),
+			glm::vec3(0.0F, 0.0F, -1.0F),
+			glm::vec3(0.0F, 0.0F, -1.0F),
+			glm::vec3(0.0F, 0.0F, -1.0F),
+			glm::vec3(0.0F, 0.0F, -1.0F)
+
 		};
 
 		size_ = 36;
 	}
 
 	obj::Mesh mesh;
-	for (auto i = 0U; i < size_; ++i)
-		mesh.vertices.push_back({ positions[i], normals[i], uvs[i] });
+	for (auto i = 0; i < size_; ++i)
+	{
+		auto v = obj::Vertex();
+		v.position = positions[i];
+		v.normal   = normals[i];
+		mesh.vertices.push_back(v);
+	}
 
 	// Create mesh
 	initialise_mesh(mesh);
@@ -183,7 +217,6 @@ Mesh::
 
 	glDeleteBuffers(1, &vbo_);
 	glDeleteBuffers(1, &nbo_);
-	glDeleteBuffers(1, &ubo_);
 }
 
 
@@ -192,25 +225,9 @@ Mesh::
 auto Mesh::
 size(
 	) const
-	-> GLuint
+	-> GLsizei
 {
 	return size_;
-}
-
-auto Mesh::
-dimensions(
-	) const
-	-> glm::vec3
-{
-	return dimensions_;
-}
-
-auto Mesh::
-vertices(
-	) const
-	-> std::vector<obj::Vertex>
-{
-	return vertices_;
 }
 
 
@@ -240,14 +257,6 @@ nbo(
 	return nbo_;
 }
 
-auto Mesh::
-ubo(
-	) const
-	-> GLuint
-{
-	return ubo_;
-}
-
 
 
 // Matrices
@@ -269,7 +278,7 @@ translate(
 
 auto Mesh::
 translate(
-	glm::vec3 vector
+	glm::vec3 const vector
 	)
 	-> void
 {
@@ -286,8 +295,8 @@ rotate(
 
 auto Mesh::
 rotate(
-	float     angle,
-	glm::vec3 vector
+	float     const angle,
+	glm::vec3 const vector
 	)
 	-> void
 {
@@ -304,7 +313,7 @@ scale(
 
 auto Mesh::
 scale(
-	glm::vec3 vector
+	glm::vec3 const vector
 	)
 	-> void
 {
@@ -316,7 +325,7 @@ scale(
 // Position
 auto Mesh::
 position(
-	glm::vec3 position
+	glm::vec3 const position
 	)
 	-> void
 {
@@ -359,31 +368,26 @@ initialise_mesh(
 	)
 	-> void
 {
-	// Store unique vertices
-	vertices_ = mesh.vertices;
-	vertices_.erase(
-		std::unique(
-			vertices_.begin(),
-			vertices_.end()),
-		vertices_.end());
-
 	// Get positions and normals
-	std::vector<glm::vec3> positions;
-	std::vector<glm::vec3> normals;
-	std::vector<glm::vec2> uvs;
+	auto positions = std::vector<glm::vec3>();
+	auto normals = std::vector<glm::vec3>();
+
+	positions.reserve(mesh.vertices.size());
+	normals.reserve(mesh.vertices.size());
 
 	for (auto const& v : mesh.vertices)
 	{
 		positions.push_back(v.position);
 		normals.push_back(v.normal);
-		uvs.push_back(v.uv);
 	}
 
-	dimensions_ = calculate_dimensions(positions);
+
 
 	// Create vertex array object
 	glGenVertexArrays(1, &vao_);
 	glBindVertexArray(vao_);
+
+
 
 	// Create vertex buffer, bind to location 0
 	glGenBuffers(1, &vbo_);
@@ -396,6 +400,8 @@ initialise_mesh(
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
+
+
 	// Create normal buffer, bind to location 1
 	glGenBuffers(1, &nbo_);
 	glBindBuffer(GL_ARRAY_BUFFER, nbo_);
@@ -407,40 +413,9 @@ initialise_mesh(
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
-	// Create uv buffer, bind to location 2
-	glGenBuffers(1, &ubo_);
-	glBindBuffer(GL_ARRAY_BUFFER, ubo_);
-	glBufferData(
-		GL_ARRAY_BUFFER,
-		size_ * sizeof(uvs.front()),
-		uvs.data(),
-		GL_STATIC_DRAW);
-	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
+
 
 	glBindVertexArray(0);
-}
-
-
-
-// Vertex operations
-auto Mesh::
-calculate_dimensions(
-	std::vector<glm::vec3> const& vertices
-	)
-	-> glm::vec3
-{
-	auto max = vertices.front();
-	auto min = vertices.front();
-
-	for (auto const& vertex : vertices)
-		for (auto i = 0; i < 3; ++i)
-			if (vertex[i] < min[i])
-				min[i] = vertex[i];
-			else if (vertex[i] > max[i])
-				max[i] = vertex[i];
-
-	return max - min;
 }
 
 } // namespace ogl

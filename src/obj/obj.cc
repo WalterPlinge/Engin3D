@@ -51,9 +51,11 @@ namespace obj {
 		// Clear previous data
 		clear();
 
+
+
 		// Open file to string vector
 		std::ifstream file(filename);
-		if (!file)
+		if (!file.good())
 			return false;
 
 		std::vector<std::string> lines;
@@ -61,6 +63,8 @@ namespace obj {
 			lines.push_back(line);
 
 		file.close();
+
+
 
 		// Temporary lists
 		std::vector<glm::vec3> positions;
@@ -73,6 +77,10 @@ namespace obj {
 		// Parse tokens for each line
 		for (const std::string& line : lines) {
 			const std::vector<std::string> line_tokens(split_string(line, ' '));
+
+			// Skip empty lines
+			if (line_tokens.empty())
+				continue;
 
 			// Vertex position
 			if (line_tokens.front() == "v") {

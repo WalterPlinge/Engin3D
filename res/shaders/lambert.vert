@@ -13,6 +13,8 @@ uniform mat4 projection;
 out vec3 normal;
 
 void main() {
-    gl_Position = projection * view * translate * rotate * scale * vec4(vPosition, 1.0f);
-    normal = vec3(rotate * vec4(vNormal, 1.0f));
+	mat4 model = translate * rotate * scale;
+	mat4 mvp   = projection * view * model;
+	gl_Position = mvp * vec4(vPosition, 1.0F);
+	normal = vec3(rotate * vec4(vNormal, 1.0F));
 }

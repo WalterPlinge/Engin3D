@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -15,16 +16,13 @@ namespace ogl
 class Mesh
 {
 	// Variables
-	GLuint                   size_       = 0;
-	glm::vec3                dimensions_ = glm::vec3(1.0F);
-	std::vector<obj::Vertex> vertices_;
+	GLsizei                  size_ = 0;
 	obj::Obj                 obj_;
 
 	// Buffers
 	GLuint vao_ = 0;
 	GLuint vbo_ = 0;
 	GLuint nbo_ = 0;
-	GLuint ubo_ = 0;
 
 	// Matrices
 	glm::mat4 translate_ = glm::mat4(1.0F);
@@ -34,7 +32,7 @@ class Mesh
 public:
 
 	// Shader
-	Shader shader;
+	std::shared_ptr<Shader> shader;
 
 
 
@@ -67,17 +65,7 @@ public:
 	auto
 	size(
 		) const
-		-> GLuint;
-
-	auto
-	dimensions(
-		) const
-		-> glm::vec3;
-
-	auto
-	vertices(
-		) const
-		-> std::vector<obj::Vertex>;
+		-> GLsizei;
 
 
 
@@ -94,11 +82,6 @@ public:
 
 	auto
 	nbo(
-		) const
-		-> GLuint;
-
-	auto
-	ubo(
 		) const
 		-> GLuint;
 
@@ -149,7 +132,7 @@ public:
 	// Position
 	auto
 	position(
-		glm::vec3 p
+		glm::vec3 position
 		)
 		-> void;
 
@@ -175,15 +158,6 @@ private:
 		obj::Mesh const& mesh
 		)
 		-> void;
-
-
-
-	// Vertex operations
-	auto static
-	calculate_dimensions(
-		std::vector<glm::vec3> const& vertices
-		)
-		-> glm::vec3;
 };
 
 } // namespace ogl

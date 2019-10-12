@@ -24,42 +24,45 @@ main(
 	// Application setup
 
 	app::initialise_renderer();
-	app::camera.position(glm::vec3(5.0F));
+	app::camera.position = glm::vec3(0.0F, -20.0F, 5.0F);
 	app::camera.look_at(glm::vec3(0.0F));
+	app::camera.sensitivity = 0.001F;
+
+
 
 	// Generate shader
-	auto shader = ogl::Shader();
-	shader.name = "basic shader";
-	shader.add(GL_VERTEX_SHADER, "res/shaders/solid.vert");
-	shader.add(GL_FRAGMENT_SHADER, "res/shaders/solid_green.frag");
-	shader.build();
+	auto lambert = std::make_shared<Shader>("Lambert");
+	lambert->add(GL_VERTEX_SHADER, "res/shaders/lambert.vert");
+	lambert->add(GL_FRAGMENT_SHADER, "res/shaders/lambert.frag");
+	lambert->build();
 
-	////////////////////////////////////////////////////////////
+
+
 	// Mesh
+	auto ground = Mesh(Mesh::Quad);
+	ground.scale(glm::vec3(5.0F));
+	ground.shader = lambert;
 
-	auto ground = ogl::Mesh();
-//	ground.position(glm::vec3(15.0f, 0.0f, 15.0f));
-//	ground.scale(glm::vec3(15.0f));
-	ground.shader = shader;
-///	Mesh sphereMesh("resources/models/sphere.obj");
-///	sphereMesh.shader = stripe;
+	auto cube = Mesh(Mesh::Cube);
+	cube.translate(glm::vec3(1.0F, 0.0F, 1.0F));
+	cube.shader = lambert;
 
-	// Random number generator
-///	std::mt19937 rng;
-///	rng.seed(std::random_device()());
+	auto sphere = Mesh("res/models/sphere.obj");
+	sphere.translate(glm::vec3(-1.0F, 0.0F, 1.0F));
+	sphere.shader = lambert;
 
-	////////////////////////////////////////////////////////////
+
+
 	// Time variables
-
 	auto           time        = 0.0F;
 	auto           accumulator = 0.0F;
 	auto constexpr framerate   = 60.0F;
 	auto const     delta_time   = 1.0F / framerate;
 	auto           current_time = float(glfwGetTime());
 
-	////////////////////////////////////////////////////////////
-	// Application loop
 
+
+	// Application loop
 	while (!app::should_close()) {
 
 		// Update time
@@ -68,35 +71,35 @@ main(
 		current_time         = new_time;
 		accumulator         += frameTime;
 
-		/////////////////////////////////////////////////////////
-		// Application update
 
+
+		// Application update
 		app::update(frameTime);
 		app::show_fps(new_time);
 
-		/////////////////////////////////////////////////////////
-		// Physics
 
+
+		// Physics
 		while (accumulator >= delta_time) {
 
-			//////////////////////////////////////////////////////
 			// Time
-
 			accumulator -= delta_time;
 			time        += delta_time;
 		}
 
-		/////////////////////////////////////////////////////////
-		// Render
 
+
+		// Render
 		app::clear();
 		app::draw(ground);
+		app::draw(cube);
+		app::draw(sphere);
 		app::display();
 	}
 
-	////////////////////////////////////////////////////////////
-	// Close app
 
+
+	// Close app
 	app::close();
 	exit(EXIT_SUCCESS);
 }
