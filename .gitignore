@@ -1,4 +1,3 @@
-
 # Created by https://www.gitignore.io/api/c++,visualstudio,visualstudiocode
 # Edit at https://www.gitignore.io/?templates=c++,visualstudio,visualstudiocode
 
@@ -10,7 +9,7 @@
 *.slo
 *.lo
 *.o
-*.obj
+#*.obj
 
 # Precompiled Headers
 *.gch

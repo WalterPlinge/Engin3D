@@ -343,7 +343,11 @@ load_obj(
 {
 	// Load file
 	if (!obj_.load(file))
+	{
+		std::cerr << "ERROR: Could not load " <<
+			file << std::endl;
 		return false;
+	}
 
 	initialise_mesh(obj_.get_meshes().front());
 	return true;
