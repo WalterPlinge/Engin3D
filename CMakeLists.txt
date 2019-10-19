@@ -75,12 +75,16 @@ add_subdirectory(lib/glm)
 # Engin3D
 add_subdirectory(src)
 
-set_target_properties(Engin3D libglew_static glfw
-	PROPERTIES
-		MSVC_RUNTIME_LIBRARY MultiThreaded$<$<CONFIG:Debug>:Debug>
-		VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CONFIG}
-)
-
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME OR ENGIN3D_BUILD_EXAMPLE)
 	add_subdirectory(example)
+endif()
+
+if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME OR ENGIN3D_BUILD_SETTINGS)
+
+	set_target_properties(Engin3D Engin3D_Example libglew_static glfw
+		PROPERTIES
+			MSVC_RUNTIME_LIBRARY MultiThreaded$<$<CONFIG:Debug>:Debug>
+			VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CONFIG}
+	)
+
 endif()
