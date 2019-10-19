@@ -29,7 +29,7 @@ add_library(Engin3D
 
 target_include_directories(Engin3D
 	PUBLIC
-		../include
+		${PROJECT_SOURCE_DIR}/include
 )
 
 target_link_libraries(Engin3D

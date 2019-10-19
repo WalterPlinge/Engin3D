@@ -12,8 +12,9 @@ target_compile_features(Engin3D_Example
 
 set_target_properties(Engin3D_Example
 	PROPERTIES
-		CXX_EXTENSIONS OFF
-		FOLDER         Engin3D_Example
+		CXX_EXTENSIONS           OFF
+		FOLDER                   Engin3D_Example
+		RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
 )
 
 add_dependencies(Engin3D_Example

@@ -7,10 +7,15 @@ cmake_minimum_required(VERSION 3.15)
 set(CMAKE_DISABLE_SOURCE_CHANGES  ON)
 set(CMAKE_DISABLE_IN_SOURCE_BUILD ON)
 
+## Project
+project(Engin3D
+	LANGUAGES CXX
+)
+
 # These are for static builds
 # Set ON to build this library like this
 # Copy them to main cmake file if you want them for your whole project
-if(ENGIN3D_BUILD_SETTINGS)
+if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME OR ENGIN3D_BUILD_SETTINGS)
 
 	# Build
 	set(CMAKE_CXX_EXTENSIONS OFF)
@@ -39,19 +44,12 @@ endif()
 
 
 
-## Project
-project(Engin3D
-	LANGUAGES CXX
-)
-
-
-
 ### Resources
 add_custom_target(copy_resources ALL
 	COMMAND ${CMAKE_COMMAND} -E
 	copy_directory
 		${CMAKE_SOURCE_DIR}/resources
-		${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resources
+		${CMAKE_BINARY_DIR}/bin/resources
 )
 
 
@@ -88,7 +86,7 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME OR ENGIN3D_BUILD_SETTINGS)
 	set_target_properties(Engin3D libglew_static glfw
 		PROPERTIES
 			MSVC_RUNTIME_LIBRARY MultiThreaded$<$<CONFIG:Debug>:Debug>
-			VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CONFIG}
+			VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/${CONFIG}
 	)
 
 endif()
