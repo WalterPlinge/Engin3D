@@ -1,54 +1,51 @@
-add_executable(${PROJECT_NAME}
-##	main.hh
-	main.cc
+# Include directories
+set(OBJ_DIR ../include/e3d/obj)
+set(OGL_DIR ../include/e3d/ogl)
 
-# Objects
-	obj/obj.hh
+# Header files
+set(HEADER_FILES
+	${OBJ_DIR}/obj.hh
+
+	${OGL_DIR}/app.hh
+	${OGL_DIR}/camera.hh
+	${OGL_DIR}/mesh.hh
+	${OGL_DIR}/shader.hh
+)
+
+# Source files
+set(SOURCE_FILES
 	obj/obj.cc
 
-# OpenGL
-	ogl/app.hh
 	ogl/app.cc
-	ogl/camera.hh
 	ogl/camera.cc
-	ogl/mesh.hh
 	ogl/mesh.cc
-	ogl/shader.hh
 	ogl/shader.cc
 )
 
-target_link_libraries(${PROJECT_NAME}
+add_library(Engin3D
+	${HEADER_FILES}
+	${SOURCE_FILES}
+)
+
+target_include_directories(Engin3D
+	PUBLIC
+		../include
+)
+
+target_link_libraries(Engin3D
 	PUBLIC
 		glm
 		libglew_static
 		glfw
 )
 
-target_compile_features(${PROJECT_NAME}
+target_compile_features(Engin3D
 	PUBLIC
 		cxx_std_17
 )
 
-set_target_properties(${PROJECT_NAME} PROPERTIES
-	CXX_EXTENSIONS OFF
-	FOLDER         ${PROJECT_NAME}
+source_group(TREE
+	${PROJECT_SOURCE_DIR}/include
+	PREFIX "Header Files"
+	FILES ${HEADER_FILES}
 )
-
-add_dependencies(${PROJECT_NAME}
-	copy_resources
-)
-
-#set(source "${CMAKE_SOURCE_DIR}/shaders")
-#set(destination "${CMAKE_CURRENT_BINARY_DIR}/shaders")
-#add_custom_command(
-#    TARGET ${PROJECT_NAME} POST_BUILD
-#    COMMAND ${CMAKE_COMMAND} -E create_symlink ${source} ${destination}
-#    DEPENDS ${destination}
-#    COMMENT "symbolic link resources folder from ${source} => ${destination}"
-#)
-
-#target_include_directories(${PROJECT_NAME}
-#	PUBLIC
-#		src
-#		lib
-#)

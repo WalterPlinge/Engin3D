@@ -31,6 +31,7 @@ Camera extern camera;
 // Initialise
 auto
 initialise_renderer(
+	std::string const& title
 	)
 	-> void;
 

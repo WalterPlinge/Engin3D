@@ -1,4 +1,4 @@
-#include "camera.hh"
+#include "e3d/ogl/camera.hh"
 
 #include <limits>
 

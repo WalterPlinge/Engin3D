@@ -1,4 +1,4 @@
-#include "app.hh"
+#include <e3d/ogl/app.hh>
 
 #include <ctime>
 #include <iostream>
@@ -27,6 +27,9 @@ auto static           screen_height_ = 0;
 auto static first_mouse_ = true;
 auto static mouse_pos_   = glm::vec2();
 auto static keyboard_    = keyboard_t{ false };
+
+// Details
+auto static title_ = std::string();
 
 
 
@@ -114,11 +117,15 @@ window_size_callback(
 // Initialise
 auto
 initialise_renderer(
+	std::string const& title
 	)
 	-> void
 {
 	// Set close function to run at exit
 	std::atexit(close);
+
+	// Set title
+	title_ = title;
 
 
 
@@ -134,7 +141,7 @@ initialise_renderer(
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
 	// Window error handling
-	window_ = glfwCreateWindow(width_, height_, "Engin3D", nullptr, nullptr);
+	window_ = glfwCreateWindow(width_, height_, title_.c_str(), nullptr, nullptr);
 
 	if (!window_)
 	{
@@ -238,7 +245,7 @@ show_fps(
 		// Display information in window title
 		std::ostringstream output;
 		output.precision(3);
-		output << std::fixed << "ShaderToy"
+		output << std::fixed << title_ <<
 			" - FPS: " << fps <<
 			" - Frame: " << ms_per_frame << "ms" << std::endl;
 		glfwSetWindowTitle(window_, output.str().c_str());

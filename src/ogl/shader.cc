@@ -1,4 +1,4 @@
-#include "shader.hh"
+#include <e3d/ogl/shader.hh>
 
 #include <fstream>
 #include <memory>

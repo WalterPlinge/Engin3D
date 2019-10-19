@@ -8,7 +8,7 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/ext.hpp>
 
-#include "ogl/app.hh"
+#include <e3d/ogl/app.hh>
 
 
 
@@ -23,7 +23,7 @@ main(
 {
 	// Application setup
 
-	app::initialise_renderer();
+	app::initialise_renderer("Engin3D Example");
 	app::camera.position = glm::vec3(0.0F, 20.0F, 5.0F);
 	app::camera.look_at(glm::vec3(0.0F));
 	app::camera.sensitivity = 0.001F;

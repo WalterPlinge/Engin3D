@@ -1,4 +1,4 @@
-#include "mesh.hh"
+#include <e3d/ogl/mesh.hh>
 
 #include <algorithm>
 
