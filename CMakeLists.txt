@@ -7,13 +7,10 @@ cmake_minimum_required(VERSION 3.15)
 set(CMAKE_DISABLE_SOURCE_CHANGES  ON)
 set(CMAKE_DISABLE_IN_SOURCE_BUILD ON)
 
-## Project
-project(Engin3D
-	LANGUAGES CXX
-)
-
-# Only set these if this is the main project
-if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME OR ENGIN3D_BUILD_SETTINGS)
+# These are for static builds
+# Set ON to build this library like this
+# Copy them to main cmake file if you want them for your whole project
+if(ENGIN3D_BUILD_SETTINGS)
 
 	# Build
 	set(CMAKE_CXX_EXTENSIONS OFF)
@@ -23,13 +20,6 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME OR ENGIN3D_BUILD_SETTINGS)
 
 	# Organisation
 	set(GLOBAL PROPERTY USE_FOLDERS ON)
-	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-
-	#set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
-	#set(BIN_DIR ${CMAKE_BINARY_DIR}/bin)
-
-	## Ouput all DLLs from all libs into main build folder
-	#SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BIN_DIR})
 
 	# GLEW
 	set(glew-cmake_BUILD_SHARED        OFF CACHE BOOL "" FORCE)
@@ -46,6 +36,14 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME OR ENGIN3D_BUILD_SETTINGS)
 	set(GLM_TEST_ENABLE   OFF CACHE BOOL "" FORCE)
 
 endif()
+
+
+
+## Project
+project(Engin3D
+	LANGUAGES CXX
+)
+
 
 
 ### Resources
@@ -72,12 +70,18 @@ add_subdirectory(lib/glfw)
 # GLM
 add_subdirectory(lib/glm)
 
+
+
 # Engin3D
 add_subdirectory(src)
+
+
 
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME OR ENGIN3D_BUILD_EXAMPLE)
 	add_subdirectory(example)
 endif()
+
+
 
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME OR ENGIN3D_BUILD_SETTINGS)
 

@@ -32,8 +32,8 @@ main(
 
 	// Generate shader
 	auto lambert = std::make_shared<Shader>("Lambert");
-	lambert->add(GL_VERTEX_SHADER, "res/shaders/lambert.vert");
-	lambert->add(GL_FRAGMENT_SHADER, "res/shaders/lambert.frag");
+	lambert->add(GL_VERTEX_SHADER, "resources/shaders/lambert.vert");
+	lambert->add(GL_FRAGMENT_SHADER, "resources/shaders/lambert.frag");
 	lambert->build();
 
 
@@ -47,7 +47,7 @@ main(
 	cube.translate(glm::vec3(1.0F, 0.0F, 1.0F));
 	cube.shader = lambert;
 
-	auto sphere = Mesh("res/models/sphere.obj");
+	auto sphere = Mesh("resources/models/sphere.obj");
 	sphere.translate(glm::vec3(-1.0F, 0.0F, 1.0F));
 	sphere.shader = lambert;
 
