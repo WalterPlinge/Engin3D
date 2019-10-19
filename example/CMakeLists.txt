@@ -10,17 +10,12 @@ target_compile_features(Engin3D_Example
 		cxx_std_17
 )
 
-set_target_properties(Engin3D_Example PROPERTIES
-	CXX_EXTENSIONS OFF
-	FOLDER         Engin3D_Example
+set_target_properties(Engin3D_Example
+	PROPERTIES
+		CXX_EXTENSIONS OFF
+		FOLDER         Engin3D_Example
 )
 
 add_dependencies(Engin3D_Example
 	copy_resources
-)
-
-set_target_properties(Engin3D
-	PROPERTIES
-		CXX_EXTENSIONS OFF
-		FOLDER         Engin3D
 )
