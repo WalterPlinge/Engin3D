@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <vector>
@@ -15,9 +16,24 @@ namespace ogl
 
 class Mesh
 {
+public:
+
+	// Base types
+	enum Type {
+		Empty,
+		Triangle,
+		Quad,
+		Cube,
+		File
+	};
+
+private:
+
+	Type type_ = Empty;
+
 	// Variables
-	GLsizei                  size_ = 0;
-	obj::Obj                 obj_;
+	std::uintmax_t  size_ = 0;
+	obj::Obj        obj_;
 
 	// Buffers
 	GLuint vao_ = 0;
@@ -36,24 +52,14 @@ public:
 
 
 
-	// Base types
-	enum Type {
-		Triangle,
-		Quad,
-		Cube,
-	};
 
 
 
 	// Constructors
 	explicit
 	Mesh(
-		std::string const& file
-		);
-
-	explicit
-	Mesh(
-		Type type = Triangle
+		Type               type = Empty,
+		std::string const& file = std::string()
 		);
 
 	~Mesh(
@@ -65,7 +71,7 @@ public:
 	auto
 	size(
 		) const
-		-> GLsizei;
+		-> std::uintmax_t;
 
 
 
@@ -138,12 +144,21 @@ public:
 
 
 
-	// Load from file
+	// Load model or file
 	auto
-	load_obj(
-		std::string const& file
+	load(
+		Type               type = Empty,
+		std::string const& file = std::string()
 		)
 		-> bool;
+
+
+
+	// Clean up mesh
+	auto
+	clean(
+		)
+		-> void;
 
 private:
 

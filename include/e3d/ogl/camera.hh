@@ -18,7 +18,7 @@ public:
 	glm::vec3 position = glm::vec3(0.0F);
 
 	float sensitivity = 0.25F;
-	float speed       = 10.0F;
+	float speed       = 4.0F;
 	bool  boost       = false;
 
 	// Attributes

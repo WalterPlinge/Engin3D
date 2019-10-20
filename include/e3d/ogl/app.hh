@@ -1,6 +1,8 @@
 #pragma once
 
 #include <array>
+#include <cstdint>
+#include <functional>
 
 #define GLEW_STATIC
 #include <GL/glew.h>
@@ -23,30 +25,51 @@ using keyboard_t = std::array<bool, GLFW_KEY_LAST>;
 
 
 
+// Details
+std::string                extern title;
+std::uintmax_t             extern width;
+std::uintmax_t             extern height;
+
 // Camera
-Camera extern camera;
+Camera                     extern camera;
+
+// Functions
+std::function<void()>      extern setup_function;
+std::function<void()>      extern input_function;
+std::function<void(float)> extern update_function;
+std::function<void(float)> extern fixed_update_function;
+std::function<void()>      extern render_function;
+std::function<void()>      extern close_function;
 
 
 
-// Initialise
+// Details
 auto
-initialise_renderer(
-	std::string const& title
+resolution(
+	)
+	-> glm::vec2;
+
+auto
+keyboard(
+	)
+	-> const keyboard_t&;
+
+auto
+mouse_pos(
+	)
+	-> glm::vec2;
+
+auto
+clear_colour(
+	glm::vec4 colour
 	)
 	-> void;
 
 
 
-// Update
+// Run application
 auto
-update(
-	float delta_time
-	)
-	-> void;
-
-auto
-show_fps(
-	float new_time
+run(
 	)
 	-> void;
 
@@ -73,31 +96,8 @@ display(
 
 // Shutdown
 auto
-should_close(
-	)
-	-> bool;
-
-auto
 close(
 	)
 	-> void;
-
-
-
-// Utilities
-auto
-resolution(
-	)
-	-> glm::vec2;
-
-auto
-keyboard(
-	)
-	-> const keyboard_t&;
-
-auto
-mouse_pos(
-	)
-	-> glm::vec2;
 
 } // namespace ogl::app

@@ -1,7 +1,9 @@
 #include <e3d/ogl/app.hh>
 
-#include <ctime>
+#include <chrono>
+#include <functional>
 #include <iostream>
+#include <unordered_map>
 #include <sstream>
 
 #include <glm/gtc/type_ptr.hpp>
@@ -11,25 +13,78 @@
 namespace ogl::app
 {
 
+
+
+using clock      = std::chrono::high_resolution_clock;
+using              std::chrono::seconds;
+using time_point = std::chrono::time_point<clock>;
+using duration   = std::chrono::duration<float>;
+
+
+
+// Details
+std::string    title  = "Engin3D";
+std::uintmax_t width  = 1280U;
+std::uintmax_t height = 720U;
+
 // Camera
 Camera camera;
+
+// Functions
+std::function<void()>      setup_function        = [](){};
+std::function<void()>      input_function        = [](){};
+std::function<void(float)> update_function       = [](float){};
+std::function<void(float)> fixed_update_function = [](float){};
+std::function<void()>      render_function       = [](){};
+std::function<void()>      close_function        = [](){};
 
 // Window handle
 GLFWwindow static* window_ = nullptr;
 
 // Dimensions
-auto static constexpr width_         = 800u;
-auto static constexpr height_        = 600u;
-auto static           screen_width_  = 0;
-auto static           screen_height_ = 0;
+auto static screen_width_  = 0;
+auto static screen_height_ = 0;
 
 // Input
 auto static first_mouse_ = true;
 auto static mouse_pos_   = glm::vec2();
 auto static keyboard_    = keyboard_t{ false };
 
+
+
 // Details
-auto static title_ = std::string();
+auto
+resolution(
+	)
+	-> glm::vec2
+{
+	return glm::vec2(screen_width_, screen_height_);
+}
+
+auto
+keyboard(
+	)
+	-> const keyboard_t&
+{
+	return keyboard_;
+}
+
+auto
+mouse_pos(
+	)
+	-> glm::vec2
+{
+	return mouse_pos_;
+}
+
+auto
+clear_colour(
+	glm::vec4 const colour
+	)
+	-> void
+{
+	glClearColor(colour.r, colour.g, colour.b, colour.a);
+}
 
 
 
@@ -112,20 +167,51 @@ window_size_callback(
 	camera.aspect(screen_width_, screen_height_);
 }
 
+auto static
+show_fps(
+	time_point new_time
+	)
+	-> void
+{
+	// Keep track of current time and frame count
+	auto static current_time = time_point();
+	auto static frame_count  = int{};
+	auto const  delta_time   = duration(new_time - current_time).count();
+
+	// Limit FPS refresh rate to 4 times per second
+	if (delta_time > 0.25F)
+	{
+		// Update current time, calculate FPS and frame time
+		current_time   = new_time;
+		auto const fps = static_cast<float>
+			(frame_count) /
+			delta_time;
+		auto const ms_per_frame = 1000.0F / fps;
+
+		// Display information in window title
+		std::ostringstream output;
+		output.precision(3);
+		output << std::fixed << title <<
+			" - FPS: " << fps <<
+			" - Frame: " << ms_per_frame << "ms" << std::endl;
+		glfwSetWindowTitle(window_, output.str().c_str());
+
+		frame_count = 0;
+	}
+
+	++frame_count;
+}
+
 
 
 // Initialise
-auto
-initialise_renderer(
-	std::string const& title
+auto static
+setup(
 	)
 	-> void
 {
 	// Set close function to run at exit
 	std::atexit(close);
-
-	// Set title
-	title_ = title;
 
 
 
@@ -141,7 +227,7 @@ initialise_renderer(
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
 	// Window error handling
-	window_ = glfwCreateWindow(width_, height_, title_.c_str(), nullptr, nullptr);
+	window_ = glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr);
 
 	if (!window_)
 	{
@@ -184,21 +270,51 @@ initialise_renderer(
 
 	camera.aspect(screen_width_, screen_height_);
 
+	// User defined function
+	setup_function();
+
 	std::cout << "App initialised" << std::endl;
 }
 
 
 
-// Update
-auto
-update(
-	float delta_time
-	) -> void
+// Input
+auto static
+input(
+	)
+	-> void
 {
 	glfwPollEvents();
 
 	camera.boost = keyboard_[GLFW_KEY_LEFT_CONTROL];
 
+	if (keyboard_[GLFW_KEY_Z])
+		camera.zoom_reset();
+
+	input_function();
+}
+
+
+
+// Update
+auto static
+update(
+	float delta_time
+	)
+	-> void
+{
+	update_function(delta_time);
+}
+
+
+
+// Fixed update
+auto static
+fixed_update(
+	float delta_time
+	)
+	-> void
+{
 	if (keyboard_[GLFW_KEY_W])
 		camera.move(Camera::Forward, delta_time);
 
@@ -217,43 +333,59 @@ update(
 	if (keyboard_[GLFW_KEY_LEFT_SHIFT])
 		camera.move(Camera::Down, delta_time);
 
-	if (keyboard_[GLFW_KEY_Z])
-		camera.zoom_reset();
+	fixed_update_function(delta_time);
 }
 
-auto
-show_fps(
-	float new_time
+
+
+// Render
+auto static
+render(
 	)
 	-> void
 {
-	// Keep track of current time and frame count
-	auto static current_time = 0.0F;
-	auto static frame_count  = int{};
-	auto const  delta_time   = new_time - current_time;
+	render_function();
+}
 
-	// Limit FPS refresh rate to 4 times per second
-	if (delta_time > 0.25F)
+
+
+// Run
+auto
+run(
+	)
+	-> void
+{
+	setup();
+
+	auto           time         = 0.0F;
+	auto           accumulator  = 0.0F;
+	auto constexpr tick_rate    = 1.0F / 60.0F;
+	auto           current_time = clock::now();
+
+	while (!glfwWindowShouldClose(window_))
 	{
-		// Update current time, calculate FPS and frame time
-		current_time   = new_time;
-		auto const fps = static_cast<float>
-			(frame_count) /
-			delta_time;
-		auto const ms_per_frame = 1000.0F / fps;
+		auto       new_time   = clock::now();
+		auto const delta_time = duration(new_time - current_time).count();
+		current_time          = new_time;
+		accumulator          += delta_time;
 
-		// Display information in window title
-		std::ostringstream output;
-		output.precision(3);
-		output << std::fixed << title_ <<
-			" - FPS: " << fps <<
-			" - Frame: " << ms_per_frame << "ms" << std::endl;
-		glfwSetWindowTitle(window_, output.str().c_str());
+		input();
 
-		frame_count = 0;
+		update(delta_time);
+		show_fps(new_time);
+
+		while (accumulator >= delta_time)
+		{
+			accumulator -= delta_time;
+			time        += delta_time;
+
+			fixed_update(tick_rate);
+		}
+
+		render();
 	}
 
-	++frame_count;
+	close();
 }
 
 
@@ -264,7 +396,6 @@ clear(
 	)
 	-> void
 {
-	glClearColor(0.2F, 0.3F, 0.3F, 1.0F);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
@@ -303,50 +434,15 @@ display(
 
 
 
-
-// Shutdown
-auto
-should_close(
-	)
-	-> bool
-{
-	return glfwWindowShouldClose(window_);
-}
-
+// Close
 auto
 close(
 	)
 	-> void
 {
+	close_function();
 	glfwTerminate();
 	window_ = nullptr;
-}
-
-
-
-// Utilities
-auto
-resolution(
-	)
-	-> glm::vec2
-{
-	return glm::vec2(screen_width_, screen_height_);
-}
-
-auto
-keyboard(
-	)
-	-> const keyboard_t&
-{
-	return keyboard_;
-}
-
-auto
-mouse_pos(
-	)
-	-> glm::vec2
-{
-	return mouse_pos_;
 }
 
 } // namespace ogl::app

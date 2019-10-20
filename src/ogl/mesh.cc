@@ -12,7 +12,7 @@ namespace ogl
 {
 
 // Vertex operations
-auto
+auto static
 calculate_dimensions(
 	std::vector<obj::Vertex> const& vertices
 	)
@@ -35,188 +35,19 @@ calculate_dimensions(
 
 Mesh::
 Mesh(
+	Type        const  type,
 	std::string const& file
 	)
 {
-	load_obj(file);
 	initialise_transform();
-}
-
-Mesh::
-Mesh(
-	Type const type
-	)
-{
-	auto positions = std::vector<glm::vec3>();
-	auto normals   = std::vector<glm::vec3>();
-
-	// Calculate data for type
-	if (type == Triangle)
-	{
-		positions = {
-			glm::vec3( 0.0F, 0.0F,  1.0F),
-			glm::vec3(-1.0F, 0.0F, -1.0F),
-			glm::vec3( 1.0F, 0.0F, -1.0F)
-		};
-
-		normals = {
-			glm::vec3(0.0F, -1.0F, 0.0F),
-			glm::vec3(0.0F, -1.0F, 0.0F),
-			glm::vec3(0.0F, -1.0F, 0.0F)
-		};
-
-		size_ = 3;
-	}
-	else if (type == Quad)
-	{
-		positions = {
-			glm::vec3( 1.0F,  1.0F, 0.0F),
-			glm::vec3(-1.0F,  1.0F, 0.0F),
-			glm::vec3(-1.0F, -1.0F, 0.0F),
-			glm::vec3(-1.0F, -1.0F, 0.0F),
-			glm::vec3( 1.0F, -1.0F, 0.0F),
-			glm::vec3( 1.0F,  1.0F, 0.0F),
-		};
-
-		normals = {
-			glm::vec3(0.0F, 0.0F, 1.0F),
-			glm::vec3(0.0F, 0.0F, 1.0F),
-			glm::vec3(0.0F, 0.0F, 1.0F),
-			glm::vec3(0.0F, 0.0F, 1.0F),
-			glm::vec3(0.0F, 0.0F, 1.0F),
-			glm::vec3(0.0F, 0.0F, 1.0F)
-		};
-
-		size_ = 6;
-	}
-	else if (type == Cube)
-	{
-		positions = {
-			// RIGHT
-			glm::vec3(1.0F,  1.0F,  1.0F),
-			glm::vec3(1.0F, -1.0F,  1.0F),
-			glm::vec3(1.0F, -1.0F, -1.0F),
-			glm::vec3(1.0F, -1.0F, -1.0F),
-			glm::vec3(1.0F,  1.0F, -1.0F),
-			glm::vec3(1.0F,  1.0F,  1.0F),
-
-			// BACK
-			glm::vec3( 1.0F, 1.0F,  1.0F),
-			glm::vec3( 1.0F, 1.0F, -1.0F),
-			glm::vec3(-1.0F, 1.0F, -1.0F),
-			glm::vec3(-1.0F, 1.0F, -1.0F),
-			glm::vec3(-1.0F, 1.0F,  1.0F),
-			glm::vec3( 1.0F, 1.0F,  1.0F),
-
-			// TOP
-			glm::vec3( 1.0F,  1.0F, 1.0F),
-			glm::vec3(-1.0F,  1.0F, 1.0F),
-			glm::vec3(-1.0F, -1.0F, 1.0F),
-			glm::vec3(-1.0F, -1.0F, 1.0F),
-			glm::vec3( 1.0F, -1.0F, 1.0F),
-			glm::vec3( 1.0F,  1.0F, 1.0F),
-
-			// LEFT
-			glm::vec3(-1.0F,  1.0F,  1.0F),
-			glm::vec3(-1.0F,  1.0F, -1.0F),
-			glm::vec3(-1.0F, -1.0F, -1.0F),
-			glm::vec3(-1.0F, -1.0F, -1.0F),
-			glm::vec3(-1.0F, -1.0F,  1.0F),
-			glm::vec3(-1.0F,  1.0F,  1.0F),
-
-			// FRONT
-			glm::vec3( 1.0F, -1.0F,  1.0F),
-			glm::vec3(-1.0F, -1.0F,  1.0F),
-			glm::vec3(-1.0F, -1.0F, -1.0F),
-			glm::vec3(-1.0F, -1.0F, -1.0F),
-			glm::vec3( 1.0F, -1.0F, -1.0F),
-			glm::vec3( 1.0F, -1.0F,  1.0F),
-
-			// BOTTOM
-			glm::vec3( 1.0F,  1.0F, -1.0F),
-			glm::vec3( 1.0F, -1.0F, -1.0F),
-			glm::vec3(-1.0F, -1.0F, -1.0F),
-			glm::vec3(-1.0F, -1.0F, -1.0F),
-			glm::vec3(-1.0F,  1.0F, -1.0F),
-			glm::vec3( 1.0F,  1.0F, -1.0F)
-		};
-
-		normals = {
-			// RIGHT
-			glm::vec3(1.0F, 0.0F, 0.0F),
-			glm::vec3(1.0F, 0.0F, 0.0F),
-			glm::vec3(1.0F, 0.0F, 0.0F),
-			glm::vec3(1.0F, 0.0F, 0.0F),
-			glm::vec3(1.0F, 0.0F, 0.0F),
-			glm::vec3(1.0F, 0.0F, 0.0F),
-
-			// BACK
-			glm::vec3(0.0F, 1.0F, 0.0F),
-			glm::vec3(0.0F, 1.0F, 0.0F),
-			glm::vec3(0.0F, 1.0F, 0.0F),
-			glm::vec3(0.0F, 1.0F, 0.0F),
-			glm::vec3(0.0F, 1.0F, 0.0F),
-			glm::vec3(0.0F, 1.0F, 0.0F),
-
-			// TOP
-			glm::vec3(0.0F, 0.0F, 1.0F),
-			glm::vec3(0.0F, 0.0F, 1.0F),
-			glm::vec3(0.0F, 0.0F, 1.0F),
-			glm::vec3(0.0F, 0.0F, 1.0F),
-			glm::vec3(0.0F, 0.0F, 1.0F),
-			glm::vec3(0.0F, 0.0F, 1.0F),
-
-			// LEFT
-			glm::vec3(-1.0F, 0.0F, 0.0F),
-			glm::vec3(-1.0F, 0.0F, 0.0F),
-			glm::vec3(-1.0F, 0.0F, 0.0F),
-			glm::vec3(-1.0F, 0.0F, 0.0F),
-			glm::vec3(-1.0F, 0.0F, 0.0F),
-			glm::vec3(-1.0F, 0.0F, 0.0F),
-
-			// FRONT
-			glm::vec3(0.0F, -1.0F, 0.0F),
-			glm::vec3(0.0F, -1.0F, 0.0F),
-			glm::vec3(0.0F, -1.0F, 0.0F),
-			glm::vec3(0.0F, -1.0F, 0.0F),
-			glm::vec3(0.0F, -1.0F, 0.0F),
-			glm::vec3(0.0F, -1.0F, 0.0F),
-
-			// BOTTOM
-			glm::vec3(0.0F, 0.0F, -1.0F),
-			glm::vec3(0.0F, 0.0F, -1.0F),
-			glm::vec3(0.0F, 0.0F, -1.0F),
-			glm::vec3(0.0F, 0.0F, -1.0F),
-			glm::vec3(0.0F, 0.0F, -1.0F),
-			glm::vec3(0.0F, 0.0F, -1.0F)
-
-		};
-
-		size_ = 36;
-	}
-
-	auto mesh = obj::Mesh();
-	for (auto i = 0; i < size_; ++i)
-	{
-		auto v = obj::Vertex();
-		v.position = positions[i];
-		v.normal   = normals[i];
-		mesh.vertices.push_back(v);
-	}
-
-	// Create mesh
-	initialise_mesh(mesh);
-	initialise_transform();
+	load(type, file);
 }
 
 Mesh::
 ~Mesh(
 	)
 {
-	glDeleteVertexArrays(1, &vao_);
-
-	glDeleteBuffers(1, &vbo_);
-	glDeleteBuffers(1, &nbo_);
+	clean();
 }
 
 
@@ -225,7 +56,7 @@ Mesh::
 auto Mesh::
 size(
 	) const
-	-> GLsizei
+	-> std::uintmax_t
 {
 	return size_;
 }
@@ -334,23 +165,219 @@ position(
 
 
 
-// Load from file
+// Load model or file
 auto Mesh::
-load_obj(
+load(
+	Type        const  type,
 	std::string const& file
 	)
 	-> bool
 {
-	// Load file
-	if (!obj_.load(file))
+	if (type == Empty)
 	{
-		std::cerr << "ERROR: Could not load " <<
-			file << std::endl;
-		return false;
+		clean();
+	}
+	else if (type == File)
+	{
+		// Load file
+		if (!obj_.load(file))
+		{
+			std::cerr << "ERROR: Could not load " <<
+				file << std::endl;
+			return false;
+		}
+
+		initialise_mesh(obj_.get_meshes().front());
+	}
+	else
+	{
+		auto positions = std::vector<glm::vec3>();
+		auto normals   = std::vector<glm::vec3>();
+
+		// Calculate data for type
+		if (type == Triangle)
+		{
+			positions = {
+				glm::vec3( 0.0F, 0.0F,  1.0F),
+				glm::vec3(-1.0F, 0.0F, -1.0F),
+				glm::vec3( 1.0F, 0.0F, -1.0F)
+			};
+
+			normals = {
+				glm::vec3(0.0F, -1.0F, 0.0F),
+				glm::vec3(0.0F, -1.0F, 0.0F),
+				glm::vec3(0.0F, -1.0F, 0.0F)
+			};
+
+			size_ = 3;
+		}
+		else if (type == Quad)
+		{
+			positions = {
+				glm::vec3( 1.0F,  1.0F, 0.0F),
+				glm::vec3(-1.0F,  1.0F, 0.0F),
+				glm::vec3(-1.0F, -1.0F, 0.0F),
+				glm::vec3(-1.0F, -1.0F, 0.0F),
+				glm::vec3( 1.0F, -1.0F, 0.0F),
+				glm::vec3( 1.0F,  1.0F, 0.0F),
+			};
+
+			normals = {
+				glm::vec3(0.0F, 0.0F, 1.0F),
+				glm::vec3(0.0F, 0.0F, 1.0F),
+				glm::vec3(0.0F, 0.0F, 1.0F),
+				glm::vec3(0.0F, 0.0F, 1.0F),
+				glm::vec3(0.0F, 0.0F, 1.0F),
+				glm::vec3(0.0F, 0.0F, 1.0F)
+			};
+
+			size_ = 6;
+		}
+		else if (type == Cube)
+		{
+			positions = {
+				// RIGHT
+				glm::vec3(1.0F,  1.0F,  1.0F),
+				glm::vec3(1.0F, -1.0F,  1.0F),
+				glm::vec3(1.0F, -1.0F, -1.0F),
+				glm::vec3(1.0F, -1.0F, -1.0F),
+				glm::vec3(1.0F,  1.0F, -1.0F),
+				glm::vec3(1.0F,  1.0F,  1.0F),
+
+				// BACK
+				glm::vec3( 1.0F, 1.0F,  1.0F),
+				glm::vec3( 1.0F, 1.0F, -1.0F),
+				glm::vec3(-1.0F, 1.0F, -1.0F),
+				glm::vec3(-1.0F, 1.0F, -1.0F),
+				glm::vec3(-1.0F, 1.0F,  1.0F),
+				glm::vec3( 1.0F, 1.0F,  1.0F),
+
+				// TOP
+				glm::vec3( 1.0F,  1.0F, 1.0F),
+				glm::vec3(-1.0F,  1.0F, 1.0F),
+				glm::vec3(-1.0F, -1.0F, 1.0F),
+				glm::vec3(-1.0F, -1.0F, 1.0F),
+				glm::vec3( 1.0F, -1.0F, 1.0F),
+				glm::vec3( 1.0F,  1.0F, 1.0F),
+
+				// LEFT
+				glm::vec3(-1.0F,  1.0F,  1.0F),
+				glm::vec3(-1.0F,  1.0F, -1.0F),
+				glm::vec3(-1.0F, -1.0F, -1.0F),
+				glm::vec3(-1.0F, -1.0F, -1.0F),
+				glm::vec3(-1.0F, -1.0F,  1.0F),
+				glm::vec3(-1.0F,  1.0F,  1.0F),
+
+				// FRONT
+				glm::vec3( 1.0F, -1.0F,  1.0F),
+				glm::vec3(-1.0F, -1.0F,  1.0F),
+				glm::vec3(-1.0F, -1.0F, -1.0F),
+				glm::vec3(-1.0F, -1.0F, -1.0F),
+				glm::vec3( 1.0F, -1.0F, -1.0F),
+				glm::vec3( 1.0F, -1.0F,  1.0F),
+
+				// BOTTOM
+				glm::vec3( 1.0F,  1.0F, -1.0F),
+				glm::vec3( 1.0F, -1.0F, -1.0F),
+				glm::vec3(-1.0F, -1.0F, -1.0F),
+				glm::vec3(-1.0F, -1.0F, -1.0F),
+				glm::vec3(-1.0F,  1.0F, -1.0F),
+				glm::vec3( 1.0F,  1.0F, -1.0F)
+			};
+
+			normals = {
+				// RIGHT
+				glm::vec3(1.0F, 0.0F, 0.0F),
+				glm::vec3(1.0F, 0.0F, 0.0F),
+				glm::vec3(1.0F, 0.0F, 0.0F),
+				glm::vec3(1.0F, 0.0F, 0.0F),
+				glm::vec3(1.0F, 0.0F, 0.0F),
+				glm::vec3(1.0F, 0.0F, 0.0F),
+
+				// BACK
+				glm::vec3(0.0F, 1.0F, 0.0F),
+				glm::vec3(0.0F, 1.0F, 0.0F),
+				glm::vec3(0.0F, 1.0F, 0.0F),
+				glm::vec3(0.0F, 1.0F, 0.0F),
+				glm::vec3(0.0F, 1.0F, 0.0F),
+				glm::vec3(0.0F, 1.0F, 0.0F),
+
+				// TOP
+				glm::vec3(0.0F, 0.0F, 1.0F),
+				glm::vec3(0.0F, 0.0F, 1.0F),
+				glm::vec3(0.0F, 0.0F, 1.0F),
+				glm::vec3(0.0F, 0.0F, 1.0F),
+				glm::vec3(0.0F, 0.0F, 1.0F),
+				glm::vec3(0.0F, 0.0F, 1.0F),
+
+				// LEFT
+				glm::vec3(-1.0F, 0.0F, 0.0F),
+				glm::vec3(-1.0F, 0.0F, 0.0F),
+				glm::vec3(-1.0F, 0.0F, 0.0F),
+				glm::vec3(-1.0F, 0.0F, 0.0F),
+				glm::vec3(-1.0F, 0.0F, 0.0F),
+				glm::vec3(-1.0F, 0.0F, 0.0F),
+
+				// FRONT
+				glm::vec3(0.0F, -1.0F, 0.0F),
+				glm::vec3(0.0F, -1.0F, 0.0F),
+				glm::vec3(0.0F, -1.0F, 0.0F),
+				glm::vec3(0.0F, -1.0F, 0.0F),
+				glm::vec3(0.0F, -1.0F, 0.0F),
+				glm::vec3(0.0F, -1.0F, 0.0F),
+
+				// BOTTOM
+				glm::vec3(0.0F, 0.0F, -1.0F),
+				glm::vec3(0.0F, 0.0F, -1.0F),
+				glm::vec3(0.0F, 0.0F, -1.0F),
+				glm::vec3(0.0F, 0.0F, -1.0F),
+				glm::vec3(0.0F, 0.0F, -1.0F),
+				glm::vec3(0.0F, 0.0F, -1.0F)
+
+			};
+
+			size_ = 36;
+		}
+
+		auto mesh = obj::Mesh();
+		for (auto i = 0U; i < size_; ++i)
+		{
+			auto v = obj::Vertex();
+			v.position = positions[i];
+			v.normal   = normals[i];
+			mesh.vertices.push_back(v);
+		}
+
+		// Create mesh
+		initialise_mesh(mesh);
 	}
 
-	initialise_mesh(obj_.get_meshes().front());
 	return true;
+}
+
+
+
+// Clean up mesh
+auto Mesh::
+clean(
+	)
+	-> void
+{
+	if (vao_)
+		glDeleteVertexArrays(1, &vao_);
+	if (vbo_)
+		glDeleteBuffers(1, &vbo_);
+	if (nbo_)
+		glDeleteBuffers(1, &nbo_);
+
+	type_ = Empty;
+	size_ = 0;
+	obj_.clear();
+	vao_ = 0;
+	vbo_ = 0;
+	nbo_ = 0;
+	initialise_transform();
+	shader.reset();
 }
 
 
