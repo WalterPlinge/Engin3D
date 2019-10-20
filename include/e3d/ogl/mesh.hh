@@ -3,7 +3,6 @@
 #include <cstdint>
 #include <memory>
 #include <string>
-#include <vector>
 
 #include <glm/mat4x4.hpp>
 #include <glm/vec3.hpp>

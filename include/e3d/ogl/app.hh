@@ -3,6 +3,7 @@
 #include <array>
 #include <cstdint>
 #include <functional>
+#include <string>
 
 #define GLEW_STATIC
 #include <GL/glew.h>
