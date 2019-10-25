@@ -60,13 +60,19 @@ add_custom_target(copy_resources ALL
 find_package(OpenGL REQUIRED)
 
 # GLEW
-add_subdirectory(lib/glew-cmake)
+if (NOT TARGET glew)
+	add_subdirectory(lib/glew-cmake)
+endif()
 
 # GLFW
-add_subdirectory(lib/glfw)
+if (NOT TARGET glfw)
+	add_subdirectory(lib/glfw)
+endif()
 
 # GLM
-add_subdirectory(lib/glm)
+if (NOT TARGET glm)
+	add_subdirectory(lib/glm)
+endif()
 
 
 
