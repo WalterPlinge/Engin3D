@@ -209,8 +209,6 @@ load(
 				glm::vec3(0.0F, -1.0F, 0.0F),
 				glm::vec3(0.0F, -1.0F, 0.0F)
 			};
-
-			size_ = 3;
 		}
 		else if (type == Quad)
 		{
@@ -231,8 +229,6 @@ load(
 				glm::vec3(0.0F, 0.0F, 1.0F),
 				glm::vec3(0.0F, 0.0F, 1.0F)
 			};
-
-			size_ = 6;
 		}
 		else if (type == Cube)
 		{
@@ -336,8 +332,6 @@ load(
 				glm::vec3(0.0F, 0.0F, -1.0F)
 
 			};
-
-			size_ = 36;
 		}
 
 		auto mesh = obj::Mesh();
@@ -363,8 +357,10 @@ initialise_mesh(
 	)
 	-> void
 {
+
 	if (type_ == Empty)
 		type_ = Other;
+	size_ = vertices.size();
 
 	// Create vertex array object
 	glGenVertexArrays(1, &vao_);
@@ -439,8 +435,6 @@ initialise_mesh(
 	)
 	-> void
 {
-	size_ = mesh.vertices.size();
-
 	// Get positions and normals
 	auto positions = std::vector<glm::vec3>();
 	auto normals = std::vector<glm::vec3>();
