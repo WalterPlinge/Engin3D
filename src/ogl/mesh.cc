@@ -173,6 +173,7 @@ load(
 	)
 	-> bool
 {
+	type_ = type;
 	if (type == Empty)
 	{
 		clean();
@@ -362,6 +363,9 @@ initialise_mesh(
 	)
 	-> void
 {
+	if (type_ == Empty)
+		type_ = Other;
+
 	// Create vertex array object
 	glGenVertexArrays(1, &vao_);
 	glBindVertexArray(vao_);

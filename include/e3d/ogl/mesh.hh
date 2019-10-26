@@ -23,7 +23,8 @@ public:
 		Triangle,
 		Quad,
 		Cube,
-		File
+		File,
+		Other
 	};
 
 private:
