@@ -151,6 +151,13 @@ public:
 		)
 		-> bool;
 
+	auto
+	initialise_mesh(
+		std::vector<glm::vec3> const& vertices,
+		std::vector<glm::vec3> const& normals
+		)
+		-> void;
+
 
 
 	// Clean up mesh

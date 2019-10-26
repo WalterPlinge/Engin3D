@@ -349,10 +349,46 @@ load(
 		}
 
 		// Create mesh
-		initialise_mesh(mesh);
+		initialise_mesh(positions, normals);
 	}
 
 	return true;
+}
+
+auto Mesh::
+initialise_mesh(
+	std::vector<glm::vec3> const& vertices,
+	std::vector<glm::vec3> const& normals
+	)
+	-> void
+{
+	// Create vertex array object
+	glGenVertexArrays(1, &vao_);
+	glBindVertexArray(vao_);
+
+	// Create vertex buffer, bind to location 0
+	glGenBuffers(1, &vbo_);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo_);
+	glBufferData(
+		GL_ARRAY_BUFFER,
+		size_ * sizeof(vertices.front()),
+		vertices.data(),
+		GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+	// Create normal buffer, bind to location 1
+	glGenBuffers(1, &nbo_);
+	glBindBuffer(GL_ARRAY_BUFFER, nbo_);
+	glBufferData(
+		GL_ARRAY_BUFFER,
+		size_ * sizeof(normals.front()),
+		normals.data(),
+		GL_STATIC_DRAW);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+	glBindVertexArray(0);
 }
 
 
@@ -414,41 +450,7 @@ initialise_mesh(
 		normals.push_back(v.normal);
 	}
 
-
-
-	// Create vertex array object
-	glGenVertexArrays(1, &vao_);
-	glBindVertexArray(vao_);
-
-
-
-	// Create vertex buffer, bind to location 0
-	glGenBuffers(1, &vbo_);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo_);
-	glBufferData(
-		GL_ARRAY_BUFFER,
-		size_ * sizeof(positions.front()),
-		positions.data(),
-		GL_STATIC_DRAW);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-
-
-	// Create normal buffer, bind to location 1
-	glGenBuffers(1, &nbo_);
-	glBindBuffer(GL_ARRAY_BUFFER, nbo_);
-	glBufferData(
-		GL_ARRAY_BUFFER,
-		size_ * sizeof(normals.front()),
-		normals.data(),
-		GL_STATIC_DRAW);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-
-
-	glBindVertexArray(0);
+	initialise_mesh(positions, normals);
 }
 
 } // namespace ogl
