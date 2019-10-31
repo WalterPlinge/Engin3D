@@ -48,6 +48,9 @@ private:
 
 public:
 
+	glm::vec3 minimum;
+	glm::vec3 maximum;
+
 	// Shader
 	std::shared_ptr<Shader> shader;
 
@@ -141,7 +144,7 @@ public:
 	// Position
 	auto
 	move_to(
-		glm::vec3 move_to
+		glm::vec3 position
 		)
 		-> void;
 

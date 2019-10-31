@@ -1,6 +1,7 @@
 #include <e3d/ogl/mesh.hh>
 
 #include <algorithm>
+#include <tuple>
 
 #define GLEW_STATIC
 #include <GL/glew.h>
@@ -14,21 +15,21 @@ namespace ogl
 // Vertex operations
 auto static
 calculate_dimensions(
-	std::vector<obj::Vertex> const& vertices
+	std::vector<glm::vec3> const& vertices
 	)
-	-> glm::vec3
+	-> std::tuple<glm::vec3, glm::vec3>
 {
-	auto max = vertices.front().position;
-	auto min = vertices.front().position;
+	auto max = vertices.front();
+	auto min = vertices.front();
 
-	for (auto const& vertex : vertices)
+	for (auto const& v : vertices)
 		for (auto i = 0; i < 3; ++i)
-			if (vertex.position[i] < min[i])
-				min[i] = vertex.position[i];
-			else if (vertex.position[i] > max[i])
-				max[i] = vertex.position[i];
+			if (v[i] < min[i])
+				min[i] = v[i];
+			else if (v[i] > max[i])
+				max[i] = v[i];
 
-	return max - min;
+	return std::tie(max, min);
 }
 
 
@@ -434,13 +435,25 @@ initialise_mesh(
 {
 	if (vertices.size() != normals.size())
 	{
-		std::cerr << "Vertex and Normal count is unequal" << std::endl;
+		std::cerr << "ERROR: Vertex and Normal count is unequal" << std::endl;
 		return;
 	}
 
+	// Size and type
 	if (type_ == Empty)
 		type_ = Other;
 	size_ = vertices.size();
+
+	if (size_ == 0)
+	{
+		std::cerr << "ERROR: No vertices supplied" << std::endl;
+		return;
+	}
+
+	// Limits
+	std::tie(minimum, maximum) = calculate_dimensions(vertices);
+
+
 
 	// Create vertex array object
 	glGenVertexArrays(1, &vao_);
