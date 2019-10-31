@@ -21,10 +21,10 @@ auto static sphere = Mesh();
 void setup()
 {
 	// App settings
-	app::clear_colour(glm::vec4(0.2F, 0.3F, 0.3F, 1.0F));
-	app::camera.position = glm::vec3(0.0F, 20.0F, 5.0F);
-	app::camera.look_at(glm::vec3(0.0F));
-	app::camera.sensitivity = 0.001F;
+	renderer::clear_colour(glm::vec4(0.2F, 0.3F, 0.3F, 1.0F));
+	renderer::camera.position = glm::vec3(0.0F, 20.0F, 5.0F);
+	renderer::camera.look_at(glm::vec3(0.0F));
+	renderer::camera.sensitivity = 0.001F;
 
 	// Shader
 	lambert = std::make_shared<Shader>("Lambert");
@@ -49,16 +49,10 @@ void setup()
 void render()
 {
 	// Clear the screen
-	app::clear();
+	renderer::clear();
 
 	// Use the shader
-	if (!lambert->use())
-	{
-		std::cerr <<
-			"ERROR: Couldn't use " <<
-			lambert->name << " shader." << std::endl;
-		return;
-	}
+	lambert->use();
 
 	// Function to bind common uniforms for a mesh
 	auto const static bind = [](Mesh const& m, Shader const& s)
@@ -69,21 +63,21 @@ void render()
 	};
 
 	// Bind camera matrices
-	lambert->bind("projection", app::camera.projection());
-	lambert->bind("view", app::camera.view());
+	lambert->bind("projection", renderer::camera.projection());
+	lambert->bind("view", renderer::camera.view());
 
 	// Bind matrices and draw mesh
 	bind(sphere, *lambert);
-	app::draw(sphere);
+	renderer::draw(sphere);
 
 	bind(cube, *lambert);
-	app::draw(cube);
+	renderer::draw(cube);
 
 	bind(ground, *lambert);
-	app::draw(ground);
+	renderer::draw(ground);
 
 	// Display the render on screen
-	app::display();
+	renderer::display();
 }
 
 auto
