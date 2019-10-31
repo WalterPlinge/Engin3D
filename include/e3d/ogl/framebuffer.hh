@@ -10,9 +10,9 @@ namespace ogl
 
 class Framebuffer
 {
-	GLuint buffer_;
-	GLuint width_;
-	GLuint height_;
+	GLuint  buffer_;
+	GLuint  width_;
+	GLuint  height_;
 	Texture frame_;
 	Texture depth_;
 
@@ -53,16 +53,10 @@ public:
 		) const
 		-> Texture const&;
 
-	// Loading and clearing
 	auto
-	create(
-		)
+	is_valid(
+		) const
 		-> bool;
-
-	auto
-	clear(
-		)
-		-> void;
 };
 
 } // namespace ogl
