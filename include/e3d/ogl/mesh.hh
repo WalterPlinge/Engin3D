@@ -52,9 +52,6 @@ public:
 
 
 
-
-
-
 	// Constructors
 	explicit
 	Mesh(
@@ -137,8 +134,8 @@ public:
 
 	// Position
 	auto
-	position(
-		glm::vec3 position
+	move_to(
+		glm::vec3 move_to
 		)
 		-> void;
 

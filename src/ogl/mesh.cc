@@ -155,7 +155,7 @@ scale(
 
 // Position
 auto Mesh::
-position(
+move_to(
 	glm::vec3 const position
 	)
 	-> void
