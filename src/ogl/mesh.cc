@@ -88,6 +88,14 @@ nbo(
 	return nbo_;
 }
 
+auto Mesh::
+ubo(
+	) const
+	-> GLuint
+{
+	return ubo_;
+}
+
 
 
 // Matrices
@@ -194,6 +202,7 @@ load(
 	{
 		auto positions = std::vector<glm::vec3>();
 		auto normals   = std::vector<glm::vec3>();
+		auto uvs       = std::vector<glm::vec2>();
 
 		// Calculate data for type
 		if (type == Triangle)
@@ -208,6 +217,12 @@ load(
 				glm::vec3(0.0F, -1.0F, 0.0F),
 				glm::vec3(0.0F, -1.0F, 0.0F),
 				glm::vec3(0.0F, -1.0F, 0.0F)
+			};
+
+			uvs = {
+				glm::vec2(0.5F, 1.0F),
+				glm::vec2(0.0F, 0.0F),
+				glm::vec2(1.0F, 0.0F)
 			};
 		}
 		else if (type == Quad)
@@ -228,6 +243,15 @@ load(
 				glm::vec3(0.0F, 0.0F, 1.0F),
 				glm::vec3(0.0F, 0.0F, 1.0F),
 				glm::vec3(0.0F, 0.0F, 1.0F)
+			};
+
+			uvs = {
+				glm::vec2(1.0F, 1.0F),
+				glm::vec2(0.0F, 1.0F),
+				glm::vec2(0.0F, 0.0F),
+				glm::vec2(0.0F, 0.0F),
+				glm::vec2(1.0F, 0.0F),
+				glm::vec2(1.0F, 1.0F)
 			};
 		}
 		else if (type == Cube)
@@ -330,7 +354,56 @@ load(
 				glm::vec3(0.0F, 0.0F, -1.0F),
 				glm::vec3(0.0F, 0.0F, -1.0F),
 				glm::vec3(0.0F, 0.0F, -1.0F)
+			};
 
+			uvs = {
+				// RIGHT
+				glm::vec2(1.0F, 1.0F),
+				glm::vec2(0.0F, 1.0F),
+				glm::vec2(0.0F, 0.0F),
+				glm::vec2(0.0F, 0.0F),
+				glm::vec2(1.0F, 0.0F),
+				glm::vec2(1.0F, 1.0F),
+
+				// BACK
+				glm::vec2(1.0F, 1.0F),
+				glm::vec2(0.0F, 1.0F),
+				glm::vec2(0.0F, 0.0F),
+				glm::vec2(0.0F, 0.0F),
+				glm::vec2(1.0F, 0.0F),
+				glm::vec2(1.0F, 1.0F),
+
+				// TOP
+				glm::vec2(1.0F, 1.0F),
+				glm::vec2(0.0F, 1.0F),
+				glm::vec2(0.0F, 0.0F),
+				glm::vec2(0.0F, 0.0F),
+				glm::vec2(1.0F, 0.0F),
+				glm::vec2(1.0F, 1.0F),
+
+				// LEFT
+				glm::vec2(1.0F, 1.0F),
+				glm::vec2(0.0F, 1.0F),
+				glm::vec2(0.0F, 0.0F),
+				glm::vec2(0.0F, 0.0F),
+				glm::vec2(1.0F, 0.0F),
+				glm::vec2(1.0F, 1.0F),
+
+				// FRONT
+				glm::vec2(1.0F, 1.0F),
+				glm::vec2(0.0F, 1.0F),
+				glm::vec2(0.0F, 0.0F),
+				glm::vec2(0.0F, 0.0F),
+				glm::vec2(1.0F, 0.0F),
+				glm::vec2(1.0F, 1.0F),
+
+				// BOTTOM
+				glm::vec2(1.0F, 1.0F),
+				glm::vec2(0.0F, 1.0F),
+				glm::vec2(0.0F, 0.0F),
+				glm::vec2(0.0F, 0.0F),
+				glm::vec2(1.0F, 0.0F),
+				glm::vec2(1.0F, 1.0F),
 			};
 		}
 
@@ -340,11 +413,12 @@ load(
 			auto v = obj::Vertex();
 			v.position = positions[i];
 			v.normal   = normals[i];
+			v.uv       = uvs[i];
 			mesh.vertices.push_back(v);
 		}
 
 		// Create mesh
-		initialise_mesh(positions, normals);
+		initialise_mesh(positions, normals, uvs);
 	}
 
 	return true;
@@ -353,10 +427,16 @@ load(
 auto Mesh::
 initialise_mesh(
 	std::vector<glm::vec3> const& vertices,
-	std::vector<glm::vec3> const& normals
+	std::vector<glm::vec3> const& normals,
+	std::vector<glm::vec2> const& uvs
 	)
 	-> void
 {
+	if (vertices.size() != normals.size())
+	{
+		std::cerr << "Vertex and Normal count is unequal" << std::endl;
+		return;
+	}
 
 	if (type_ == Empty)
 		type_ = Other;
@@ -388,6 +468,22 @@ initialise_mesh(
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
+	// Create an empty list if uvs were not passed
+	auto empty_uvs = std::vector<glm::vec2>();
+	if (uvs.empty())
+		empty_uvs.resize(size_);
+
+	// Create uv buffer, bind to location 2
+	glGenBuffers(1, &ubo_);
+	glBindBuffer(GL_ARRAY_BUFFER, ubo_);
+	glBufferData(
+		GL_ARRAY_BUFFER,
+		size_ * sizeof(uvs.front()),
+		uvs.empty() ? empty_uvs.data() : uvs.data(),
+		GL_STATIC_DRAW);
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
+
 	glBindVertexArray(0);
 }
 
@@ -405,6 +501,8 @@ clean(
 		glDeleteBuffers(1, &vbo_);
 	if (nbo_)
 		glDeleteBuffers(1, &nbo_);
+	if (ubo_)
+		glDeleteBuffers(1, &ubo_);
 
 	type_ = Empty;
 	size_ = 0;
@@ -412,6 +510,7 @@ clean(
 	vao_ = 0;
 	vbo_ = 0;
 	nbo_ = 0;
+	ubo_ = 0;
 	initialise_transform();
 	shader.reset();
 }
@@ -435,20 +534,25 @@ initialise_mesh(
 	)
 	-> void
 {
+	size_ = mesh.vertices.size();
+
 	// Get positions and normals
 	auto positions = std::vector<glm::vec3>();
-	auto normals = std::vector<glm::vec3>();
+	auto normals   = std::vector<glm::vec3>();
+	auto uvs       = std::vector<glm::vec2>();
 
 	positions.reserve(size_);
 	normals.reserve(size_);
+	uvs.reserve(size_);
 
 	for (auto const& v : mesh.vertices)
 	{
 		positions.push_back(v.position);
 		normals.push_back(v.normal);
+		uvs.push_back(v.uv);
 	}
 
-	initialise_mesh(positions, normals);
+	initialise_mesh(positions, normals, uvs);
 }
 
 } // namespace ogl

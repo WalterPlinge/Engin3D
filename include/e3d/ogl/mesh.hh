@@ -36,9 +36,10 @@ private:
 	obj::Obj        obj_;
 
 	// Buffers
-	GLuint vao_ = 0;
-	GLuint vbo_ = 0;
-	GLuint nbo_ = 0;
+	GLuint vao_ = 0U;
+	GLuint vbo_ = 0U;
+	GLuint nbo_ = 0U;
+	GLuint ubo_ = 0U;
 
 	// Matrices
 	glm::mat4 translate_ = glm::mat4(1.0F);
@@ -85,6 +86,11 @@ public:
 
 	auto
 	nbo(
+		) const
+		-> GLuint;
+
+	auto
+	ubo(
 		) const
 		-> GLuint;
 
@@ -152,7 +158,8 @@ public:
 	auto
 	initialise_mesh(
 		std::vector<glm::vec3> const& vertices,
-		std::vector<glm::vec3> const& normals
+		std::vector<glm::vec3> const& normals,
+		std::vector<glm::vec2> const& uvs = std::vector<glm::vec2>()
 		)
 		-> void;
 
