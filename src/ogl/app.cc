@@ -405,18 +405,6 @@ draw(
 	)
 	-> void
 {
-	auto const* const shader = mesh.shader.get();
-
-	if (!shader->use())
-		return;
-
-	shader->bind("translate", mesh.translate());
-	shader->bind("rotate", mesh.rotate());
-	shader->bind("scale", mesh.scale());
-
-	shader->bind("view", camera.view());
-	shader->bind("projection", camera.projection());
-
 	glBindVertexArray(mesh.vao());
 	glDrawArrays(GL_TRIANGLES, 0, mesh.size());
 

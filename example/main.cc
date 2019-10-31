@@ -9,7 +9,7 @@ using namespace ogl;
 
 
 // Shader
-std::shared_ptr<Shader> static lambert;;
+std::shared_ptr<Shader> static lambert;
 
 // Meshes
 auto static ground = Mesh();
@@ -48,10 +48,41 @@ void setup()
 
 void render()
 {
+	// Clear the screen
 	app::clear();
+
+	// Use the shader
+	if (!lambert->use())
+	{
+		std::cerr <<
+			"ERROR: Couldn't use " <<
+			lambert->name << " shader." << std::endl;
+		return;
+	}
+
+	// Function to bind common uniforms for a mesh
+	auto const static bind = [](Mesh const& m, Shader const& s)
+	{
+		s.bind("translate", m.translate());
+		s.bind("rotate",    m.rotate());
+		s.bind("scale",     m.scale());
+	};
+
+	// Bind camera matrices
+	lambert->bind("projection", app::camera.projection());
+	lambert->bind("view", app::camera.view());
+
+	// Bind matrices and draw mesh
+	bind(sphere, *lambert);
 	app::draw(sphere);
+
+	bind(cube, *lambert);
 	app::draw(cube);
+
+	bind(ground, *lambert);
 	app::draw(ground);
+
+	// Display the render on screen
 	app::display();
 }
 
