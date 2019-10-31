@@ -110,9 +110,10 @@ move(
 	-> void
 {
 	// Calculate velocity in relation to delta_time and apply boost
-	auto velocity = speed * delta_time;
+	auto velocity = speed;
 	if (boost)
 		velocity *= 5.0F;
+	velocity *= delta_time;
 
 	// Translate position by coresponding vector scaled by speed
 	if (direction == Right)
