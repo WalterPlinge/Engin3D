@@ -20,6 +20,9 @@ auto static sphere = Mesh();
 
 void setup()
 {
+	// Turn off framerate cap
+	glfwSwapInterval(0);
+
 	// App settings
 	renderer::clear_colour(glm::vec4(0.2F, 0.3F, 0.3F, 1.0F));
 	renderer::camera.position = glm::vec3(0.0F, 20.0F, 5.0F);

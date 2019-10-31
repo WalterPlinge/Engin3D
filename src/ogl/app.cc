@@ -144,10 +144,10 @@ run(
 
 		update(delta_time);
 
-		while (accumulator >= delta_time)
+		while (accumulator >= tick_rate)
 		{
-			accumulator -= delta_time;
-			time        += delta_time;
+			accumulator -= tick_rate;
+			time        += tick_rate;
 
 			fixed_update(tick_rate);
 		}
