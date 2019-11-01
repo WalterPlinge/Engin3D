@@ -20,7 +20,6 @@ Framebuffer(
 	glActiveTexture(GL_TEXTURE0);
 
 	// Create frame image data
-	frame_ = Texture(width, height);
 	glBindTexture(frame_.type(), frame_.id());
 	glTexImage2D(
 		frame_.type(),
@@ -39,7 +38,6 @@ Framebuffer(
 	glTexParameteri(frame_.type(), GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
 	// Create depth image data
-	depth_ = Texture(width, height);
 	glBindTexture(depth_.type(), depth_.id());
 	glTexImage2D(
 		depth_.type(),
