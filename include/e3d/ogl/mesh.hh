@@ -109,8 +109,8 @@ public:
 		-> void;
 
 	auto
-	euler_rotate(
-		glm::vec3 angles
+	rotate(
+		glm::vec3 euler_angles
 		)
 		-> void;
 

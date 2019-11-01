@@ -109,12 +109,12 @@ reset_transforms(
 }
 
 auto Mesh::
-euler_rotate(
-	glm::vec3 const angles
+rotate(
+	glm::vec3 const euler_angles
 	)
 	-> void
 {
-	rotate(glm::quat(angles));
+	rotate(glm::quat(euler_angles));
 }
 
 auto Mesh::
