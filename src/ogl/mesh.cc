@@ -99,7 +99,7 @@ ubo(
 
 
 
-// Matrices
+// Transforms
 auto Mesh::
 reset_transforms(
 	)
@@ -109,67 +109,48 @@ reset_transforms(
 }
 
 auto Mesh::
-translate(
-	) const
-	-> glm::mat4
-{
-	return translate_;
-}
-
-auto Mesh::
-translate(
-	glm::vec3 const vector
+euler_rotate(
+	glm::vec3 const angles
 	)
 	-> void
 {
-	translate_ = glm::translate(translate_, vector);
+	rotate(glm::quat(angles));
 }
 
 auto Mesh::
 rotate(
+	glm::quat const q
+	)
+	-> void
+{
+	orientation = glm::normalize(orientation * q);
+}
+
+
+
+// Matrices
+auto Mesh::
+translation(
 	) const
 	-> glm::mat4
 {
-	return rotate_;
+	return glm::translate(glm::mat4(1.0F), position);
 }
 
 auto Mesh::
-rotate(
-	float     const angle,
-	glm::vec3 const vector
-	)
-	-> void
-{
-	rotate_ = glm::rotate(rotate_, angle, vector);
-}
-
-auto Mesh::
-scale(
+rotation(
 	) const
 	-> glm::mat4
 {
-	return scale_;
+	return glm::mat4_cast(orientation);
 }
 
 auto Mesh::
-scale(
-	glm::vec3 const vector
-	)
-	-> void
+scalar(
+	) const
+	-> glm::mat4
 {
-	scale_ = glm::scale(scale_, vector);
-}
-
-
-
-// Position
-auto Mesh::
-move_to(
-	glm::vec3 const position
-	)
-	-> void
-{
-	translate_[3] = glm::vec4(position, 1.0F);
+	return glm::scale(glm::mat4(1.0F), scale);
 }
 
 
@@ -536,9 +517,9 @@ initialise_transform(
 	)
 	-> void
 {
-	translate_ = glm::mat4(1.0F);
-	rotate_    = glm::mat4(1.0F);
-	scale_     = glm::mat4(1.0F);
+	scale       = glm::vec3(1.0F);
+	position    = glm::vec3(0.0F);
+	orientation = glm::quat();
 }
 
 auto Mesh::

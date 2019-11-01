@@ -37,15 +37,15 @@ void setup()
 
 	// Meshes
 	ground.load(Mesh::Quad);
-	ground.scale(glm::vec3(5.0F));
+	ground.scale = glm::vec3(5.0F);
 	ground.shader = lambert;
 
 	cube.load(Mesh::Cube);
-	cube.translate(glm::vec3(1.0F, 0.0F, 1.0F));
+	cube.position += glm::vec3(1.0F, 0.0F, 1.0F);
 	cube.shader = lambert;
 
 	sphere.load(Mesh::File, "resources/models/sphere.obj");
-	sphere.translate(glm::vec3(-1.0F, 0.0F, 1.0F));
+	sphere.position += glm::vec3(-1.0F, 0.0F, 1.0F);
 	sphere.shader = lambert;
 }
 
@@ -60,9 +60,9 @@ void render()
 	// Function to bind common uniforms for a mesh
 	auto const static bind = [](Mesh const& m, Shader const& s)
 	{
-		s.bind("translate", m.translate());
-		s.bind("rotate",    m.rotate());
-		s.bind("scale",     m.scale());
+		s.bind("translate", m.translation());
+		s.bind("rotate",    m.rotation());
+		s.bind("scale",     m.scalar());
 	};
 
 	// Bind camera matrices
