@@ -101,6 +101,22 @@ ubo(
 
 // Transforms
 auto Mesh::
+calculate_bounds(
+	)
+	-> void
+{
+	minimum = obj_.vertices.front().position;
+	maximum = obj_.vertices.front().position;
+
+	for (auto const& v : obj_.vertices)
+		for (auto i = 0; i < 3; ++i)
+			if (v.position[i] < minimum[i])
+				minimum[i] = v.position[i];
+			else if (v.position[i] > maximum[i])
+				maximum[i] = v.position[i];
+}
+
+auto Mesh::
 reset_transforms(
 	)
 	-> void
@@ -389,14 +405,14 @@ load(
 			};
 		}
 
-		auto mesh = obj::Mesh();
+		size_ = positions.size();
 		for (auto i = 0U; i < size_; ++i)
 		{
 			auto v = obj::Vertex();
 			v.position = positions[i];
 			v.normal   = normals[i];
 			v.uv       = uvs[i];
-			mesh.vertices.push_back(v);
+			obj_.vertices.push_back(v);
 		}
 
 		// Create mesh
@@ -432,7 +448,7 @@ initialise_mesh(
 	}
 
 	// Limits
-	std::tie(minimum, maximum) = calculate_dimensions(vertices);
+	calculate_bounds();
 
 
 

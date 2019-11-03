@@ -1,305 +1,364 @@
 #include <e3d/obj/obj.hh>
 
-///////////////////////////////////////////////////////////////
-// HEADERS
-
-// STD
 #include <fstream>
 #include <sstream>
+#include <utility>
 
-// GLM
 #define GLM_ENABLE_EXPERIMENTAL
-#include <glm/gtx/vector_angle.hpp>
+#include <glm/ext.hpp>
 
-///////////////////////////////////////////////////////////////
-// OBJ NAMESPACE
+namespace obj
+{
 
-namespace obj {
+auto static
+split_string(
+	std::string_view const string,
+	char             const delim
+	)
+	-> std::vector<std::string_view>
+{
+	auto t = std::vector<std::string_view>();
+	auto s = string;
+	for (auto l = 0ULL; l != s.npos; s = s.substr(l + 1, s.npos))
+			if ((l = s.find(delim)))
+				t.push_back(s.substr(0, l));
+	return t;
+	/*auto tokens = std::vector<std::string_view>();
+	auto left  = string;
+	auto start = 0;
+	auto end   = start;
 
-	///////////////////////////////////////////////////////
-	// GETTERS
-
-	std::vector<Mesh> Obj::get_meshes() const
+	for (;;)
 	{
-		return meshes_;
+		end = left.find(delim);
+		auto const sub = left.substr(start, end);
+		tokens.push_back(sub);
+		left = left.substr(end, left.size());
 	}
 
-	std::vector<Vertex> Obj::get_vertices() const
+
+
+	std::vector<std::string> tokens;
+	std::stringstream string_stream(string);
+
+	for (std::string token; std::getline(string_stream, token, delimiter); )
+		tokens.push_back(token);
+
+	return tokens;*/
+}
+
+template <class T>
+auto static
+get_element(
+	std::vector<T> const& list,
+	std::intmax_t  const& index
+	)
+	-> T
+{
+	// Index relative to list end
+	if (index < 0)
+		return list[list.size() + index];
+
+	if (index == 0)
+		return list[0];
+
+	// Index relative to 0
+	return list[index - 1];
+}
+
+auto static
+in_triangle(
+	Vertex const& p,
+	Vertex const& a,
+	Vertex const& b,
+	Vertex const& c
+	)
+	-> bool
+{
+	// Vectors
+	auto const v0 = c.position - a.position;
+	auto const v1 = b.position - a.position;
+	auto const v2 = p.position - a.position;
+
+	// Dot products
+	auto const dot00 = glm::dot(v0, v0);
+	auto const dot01 = glm::dot(v0, v1);
+	auto const dot02 = glm::dot(v0, v2);
+	auto const dot11 = glm::dot(v1, v1);
+	auto const dot12 = glm::dot(v1, v2);
+
+	// Barycentric coordinates
+	auto const inv_denom = 1.0F / dot00 * dot11 - dot01 * dot01;
+	auto const u = (dot11 * dot02 - dot01 * dot12) * inv_denom;
+	auto const v = (dot00 * dot12 - dot01 * dot02) * inv_denom;
+
+	// Check if point is in triangle
+	return u >= 0 && v >= 0 && u + v < 1;
+}
+
+auto static
+generate_face_vertices(
+	std::vector<std::string_view> const& face_tokens,
+	std::vector<glm::vec3>        const& positions,
+	std::vector<glm::vec3>        const& normals,
+	std::vector<glm::vec2>        const& uvs
+	)
+	-> std::vector<Vertex>
+{
+	auto vertices = std::vector<Vertex>();
+
+	// Keep track of missing normals
+	auto generate_normals = false;
+
+	// Parse every face
+	for (auto i = 1U; i < face_tokens.size(); ++i)
 	{
-		return vertices_;
+		// Split vertex tokens
+		auto const tokens = split_string(face_tokens[i], '/');
+
+		auto vertex = Vertex{};
+
+		// Vertex always has position
+		vertex.position = get_element(
+			positions,
+			std::stoi(std::string(tokens[0])));
+
+		// Texture coordinates (optional)
+		if (tokens.size() > 1)
+			if (!tokens[1].empty())
+				vertex.uv = get_element(
+					uvs,
+					std::stoi(std::string(tokens[1])));
+
+		// Normals
+		if (tokens.size() > 2)
+			vertex.normal = get_element(
+				normals,
+				std::stoi(std::string(tokens[2])));
+		else
+			generate_normals = true;
+
+		vertices.push_back(vertex);
 	}
 
-	std::vector<unsigned> Obj::get_indices() const
+	// Generate missing normals
+	if (generate_normals && vertices.size() >= 3)
+		for (Vertex& vertex : vertices)
+			vertex.normal = glm::cross(
+				vertices[0].position - vertices[1].position,
+				vertices[2].position - vertices[1].position);
+
+	return vertices;
+}
+
+auto
+triangulate_vertices(
+	std::vector<Vertex> const& vertices
+	)
+	-> std::vector<std::size_t>
+{
+	// Already a triangle
+	if (vertices.size() == 3)
+		return { 0, 1, 2 };
+
+	// Indices and copy of vertices
+	auto indices = std::vector<std::size_t>();
+	auto verts   = vertices;
+
+	do
 	{
-		return indices_;
-	}
+		for (auto i = 0U; i < verts.size(); ++i)
+		{
+			// Previous, current and next
+			auto const& previous = verts[(!i ? verts.size() : i) - 1];
+			auto const& current  = verts[i];
+			auto const& next     = verts[(i + 1) == verts.size() ? 0 : i + 1];
 
-	std::vector<Material> Obj::get_materials() const
+			// Only triangle left
+			if (verts.size() == 3)
+			{
+				for (auto j = 0U; j < vertices.size(); ++j)
+				{
+					auto const& pos = vertices[j].position;
+					if (pos == previous.position
+					 || pos == current.position
+					 || pos == next.position)
+						indices.push_back(j);
+				}
+
+				return indices;
+			}
+
+			// Skip exterior vertex
+			auto const theta = glm::degrees(glm::angle(
+				previous.position - current.position,
+				next.position - current.position));
+			if (theta <= 0 || theta >= 180)
+				continue;
+
+			// If any vertices are within this triangle
+			auto vertex_in_triangle = false;
+			for (auto const& v : vertices)
+			{
+				if (v.position != previous.position
+				 && v.position != current.position
+				 && v.position != next.position
+				 && in_triangle(v, previous, current, next))
+				{
+					vertex_in_triangle = true;
+					break;
+				}
+			}
+
+			if (vertex_in_triangle)
+				continue;
+
+			// Create triangle
+			for (auto j = 0U; j < vertices.size(); ++j)
+			{
+				auto const& pos = vertices[j].position;
+				if (pos == previous.position
+				|| pos == current.position
+				|| pos == next.position)
+					indices.push_back(j);
+			}
+
+			// Delete current from list
+			for (auto j = 0U; j < verts.size(); ++j)
+			{
+				if (verts[j].position == current.position)
+				{
+					verts.erase(verts.begin() + j);
+					break;
+				}
+			}
+
+			// Reset i to -1 for loop increment
+			i = -1;
+		}
+	} while (!indices.empty() && !verts.empty());
+
+	return indices;
+}
+
+
+
+auto Obj::
+load(
+	std::string_view const filename
+	)
+	-> bool
+{
+	// If the file is not an .obj file return false
+	if (filename.substr(filename.size() - 4, 4) != ".obj")
+		return false;
+
+	// Clear previous data
+	clear();
+
+	// Load file lines into string vector
+	auto lines = std::vector<std::string>();
 	{
-		return materials_;
-	}
-
-	///////////////////////////////////////////////////////////
-	// FILE LOADING
-
-	bool Obj::load(const std::string& filename)
-	{
-		// If the file is not an .obj file return false
-		if (filename.substr(filename.size() - 4, 4) != ".obj")
-			return false;
-
-		// Clear previous data
-		clear();
-
-
-
-		// Open file to string vector
-		std::ifstream file(filename);
+		std::ifstream file(filename.data());
 		if (!file.good())
 			return false;
 
-		std::vector<std::string> lines;
-		for (std::string line; std::getline(file, line); )
+		for (std::string line; std::getline(file, line); /**/)
 			lines.push_back(line);
-
-		file.close();
-
+	}
 
 
-		// Temporary lists
-		std::vector<glm::vec3> positions;
-		std::vector<glm::vec3> normals;
-		std::vector<glm::vec2> uvs;
 
-		std::vector<Vertex> vertices;
-		std::vector<unsigned> indices;
+	// Temporary lists
+	auto temp_positions = std::vector<glm::vec3>();
+	auto temp_normals   = std::vector<glm::vec3>();
+	auto temp_uvs       = std::vector<glm::vec2>();
 
-		// Parse tokens for each line
-		for (const std::string& line : lines) {
-			const std::vector<std::string> line_tokens(split_string(line, ' '));
+	auto temp_vertices = std::vector<Vertex>();
+	auto temp_indices  = std::vector<std::size_t>();
 
-			// Skip empty lines
-			if (line_tokens.empty())
-				continue;
+	// Parse tokens for each line
+	for (std::string_view const& line : lines)
+	{
+		auto const tokens = split_string(line, ' ');
 
-			// Vertex position
-			if (line_tokens.front() == "v") {
-				positions.emplace_back(std::stof(line_tokens[1]), std::stof(line_tokens[2]), std::stof(line_tokens[3]));
-			}
-			// Vertex normal
-			else if (line_tokens.front() == "vn") {
-				normals.emplace_back(std::stof(line_tokens[1]), std::stof(line_tokens[2]), std::stof(line_tokens[3]));
-			}
-			// Vertex texture coordinates
-			else if (line_tokens.front() == "vt") {
-				uvs.emplace_back(std::stof(line_tokens[1]), std::stof(line_tokens[2]));
-			}
-			// Face vertices
-			else if (line_tokens.front() == "f") {
+		// Skip empty lines
+		if (tokens.empty())
+			continue;
 
-				// Face vertices and indices
-				std::vector<Vertex> face_vertices(generate_face_vertices(line_tokens, positions, normals, uvs));
-				std::vector<unsigned> face_indices(triangulate_vertices(face_vertices));
-
-				// Add vertices to both lists
-				vertices.insert(vertices.end(), face_vertices.begin(), face_vertices.end());
-				vertices_.insert(vertices_.end(), face_vertices.begin(), face_vertices.end());
-
-				// Add indices to both lists
-				for (const unsigned& i : face_indices) {
-					indices.push_back(vertices.size() + face_vertices.size() + i);
-					indices_.push_back(vertices_.size() - face_vertices.size() + i);
-				}
-			}
+		// Vertex position
+		else if (tokens.front() == "v")
+		{
+			temp_positions.emplace_back(
+				std::stof(std::string(tokens[1])),
+				std::stof(std::string(tokens[2])),
+				std::stof(std::string(tokens[3])));
 		}
 
-		// Deal with last mesh
-		if (!indices.empty() && !vertices.empty()) {
-			meshes_.push_back({ filename, Material(), vertices, indices });
+		// Vertex normal
+		else if (tokens.front() == "vn")
+		{
+			temp_normals.emplace_back(
+				std::stof(std::string(tokens[1])),
+				std::stof(std::string(tokens[2])),
+				std::stof(std::string(tokens[3])));
 		}
 
-		return !meshes_.empty() && !vertices_.empty() && !indices_.empty();
-	}
-
-	///////////////////////////////////////////////////////
-	// CLEANUP
-
-	void Obj::clear()
-	{
-		meshes_.clear();
-		vertices_.clear();
-		indices_.clear();
-		materials_.clear();
-	}
-
-	///////////////////////////////////////////////////////
-	// STRING OPERATIONS
-
-	std::vector<std::string> Obj::split_string(const std::string& string, const char& delimiter) const
-	{
-		std::vector<std::string> tokens;
-		std::stringstream string_stream(string);
-
-		for (std::string token; std::getline(string_stream, token, delimiter); )
-			tokens.push_back(token);
-
-		return tokens;
-	}
-
-	///////////////////////////////////////////////////////
-	// VECTOR OPERATIONS
-
-	template <class T>
-	T Obj::get_element(const std::vector<T>& list, const int& index)
-	{
-		// Index relative to list end
-		if (index < 0)
-			return list[list.size() + index];
-
-		// Index relative to 0
-		return list[index - 1];
-	}
-
-	///////////////////////////////////////////////////////
-	// VERTEX OPERATIONS
-
-	template <glm::length_t L, typename T>
-	bool Obj::in_triangle(const glm::vec<L, T>& p, const glm::vec<L, T>& a, const glm::vec<L, T>& b, const glm::vec<L, T>& c)
-	{
-		// Vectors
-		const glm::vec<L, T> v0(c - a);
-		const glm::vec<L, T> v1(b - a);
-		const glm::vec<L, T> v2(p - a);
-
-		// Dot products
-		const float dot00(glm::dot(v0, v0));
-		const float dot01(glm::dot(v0, v1));
-		const float dot02(glm::dot(v0, v2));
-		const float dot11(glm::dot(v1, v1));
-		const float dot12(glm::dot(v1, v2));
-
-		// Barycentric coordinates
-		const float inv_denom(1 / dot00 * dot11 - dot01 * dot01);
-		const float u((dot11 * dot02 - dot01 * dot12) * inv_denom);
-		const float v((dot00 * dot12 - dot01 * dot02) * inv_denom);
-
-		// Check if point is in triangle
-		return u >= 0 && v >= 0 && u + v < 1;
-	}
-
-	std::vector<Vertex> Obj::generate_face_vertices(const std::vector<std::string>& face_tokens, const std::vector<glm::vec3>& positions, const std::vector<glm::vec3>& normals, const std::vector<glm::vec2>& uvs) const
-	{
-		std::vector<Vertex> vertices;
-
-		// Keep track of missing normals
-		bool generate_normals(false);
-
-		// Parse every vertex
-		for (unsigned i(1); i < face_tokens.size(); ++i) {
-
-			// Split vertex tokens
-			std::vector<std::string> vertex_tokens(split_string(face_tokens[i], '/'));
-
-			// Vertex always has position
-			Vertex vertex{
-				get_element(positions, std::stoi(vertex_tokens[0]))
-			};
-
-			// Texture coordinates (optional)
-			if (vertex_tokens.size() > 1)
-				if (!vertex_tokens[1].empty())
-					vertex.uv = get_element(uvs, std::stoi(vertex_tokens[1]));
-
-			// Normals
-			if (vertex_tokens.size() > 2)
-				vertex.normal = get_element(normals, std::stoi(vertex_tokens[2]));
-			else
-				generate_normals = true;
-
-			vertices.push_back(vertex);
+		// Vertex texture coordinates
+		else if (tokens.front() == "vt")
+		{
+			temp_uvs.emplace_back(
+				std::stof(std::string(tokens[1])),
+				std::stof(std::string(tokens[2])));
 		}
 
-		// Generate missing normals
-		if (generate_normals && vertices.size() >= 3)
-			for (Vertex& vertex : vertices)
-				vertex.normal = glm::cross(vertices[0].position - vertices[1].position, vertices[2].position - vertices[1].position);
+		// Face vertices
+		else if (tokens.front() == "f")
+		{
+			// Face vertices and indices
+			auto const face_vertices = generate_face_vertices(
+				tokens,
+				temp_positions,
+				temp_normals,
+				temp_uvs);
+			auto const face_indices = triangulate_vertices(face_vertices);
 
-		return vertices;
-	}
+			// Add vertices to both lists
+			temp_vertices.insert(temp_vertices.end(), face_vertices.begin(), face_vertices.end());
+			vertices.insert(vertices.end(), face_vertices.begin(), face_vertices.end());
 
-	std::vector<unsigned> Obj::triangulate_vertices(const std::vector<Vertex>& vertices)
-	{
-		// Already a triangle
-		if (vertices.size() == 3)
-			return std::vector<unsigned>({ 0, 1, 2 });
-
-		// Indices and copy of vertices
-		std::vector<unsigned> indices;
-		std::vector<Vertex> verts(vertices);
-		do {
-			for (unsigned i(0); i < verts.size(); ++i) {
-
-				// Previous, current and next
-				const Vertex& previous(verts[(!i ? verts.size() : i) - 1]);
-				const Vertex& current(verts[i]);
-				const Vertex& next(verts[i + 1 == verts.size() ? 0 : i + 1]);
-
-				// Only triangle left
-				if (verts.size() == 3) {
-					for (unsigned j(0); j < vertices.size(); ++j) {
-						if (vertices[j].position == previous.position)
-							indices.push_back(j);
-
-						if (vertices[j].position == current.position)
-							indices.push_back(j);
-
-						if (vertices[j].position == next.position)
-							indices.push_back(j);
-					}
-
-					return indices;
-				}
-
-				// Skip exterior vertex
-				const float theta(glm::angle(previous.position - current.position, next.position - current.position) * (180 / glm::pi<float>()));
-				if (theta <= 0 || theta >= 180)
-					continue;
-
-				// If any vertices are within this triangle
-				bool vertex_in_triangle(false);
-				for (const Vertex& v : vertices)
-					if (v.position != previous.position && v.position != current.position && v.position != next.position && in_triangle(v.position, previous.position, current.position, next.position)) {
-						vertex_in_triangle = true;
-						break;
-					}
-				if (vertex_in_triangle)
-					continue;
-
-				// Create triangle
-				for (unsigned j(0); j < vertices.size(); ++j) {
-					if (vertices[j].position == previous.position)
-						indices.push_back(j);
-
-					if (vertices[j].position == current.position)
-						indices.push_back(j);
-
-					if (vertices[j].position == next.position)
-						indices.push_back(j);
-				}
-
-				// Delete current from list
-				for (unsigned j(0); j < verts.size(); ++j) {
-					if (verts[j].position == current.position) {
-						verts.erase(verts.begin() + j);
-						break;
-					}
-				}
-
-				// Reset i to -1 for loop increment
-				i = -1;
+			// Add indices to both lists
+			for (auto const& i : face_indices)
+			{
+				temp_indices.push_back(temp_vertices.size() + face_vertices.size() + i);
+				indices.push_back(vertices.size() - face_vertices.size() + i);
 			}
-		} while (!indices.empty() && !verts.empty());
-
-		return indices;
+		}
 	}
+
+	// Deal with last mesh
+	if (!temp_indices.empty() && !temp_vertices.empty())
+	{
+		auto mesh = Mesh();
+		mesh.name = filename;
+		mesh.material = Material();
+		mesh.vertices = temp_vertices;
+		mesh.indices = temp_indices;
+		meshes.push_back(mesh);
+	}
+
+	return !meshes.empty() && !vertices.empty() && !indices.empty();
 }
+
+auto Obj::
+clear(
+	)
+	-> void
+{
+	meshes.clear();
+	vertices.clear();
+	indices.clear();
+	materials.clear();
+}
+
+} // namespace obj
