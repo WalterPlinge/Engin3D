@@ -12,35 +12,13 @@
 namespace ogl
 {
 
-// Vertex operations
-auto static
-calculate_dimensions(
-	std::vector<glm::vec3> const& vertices
-	)
-	-> std::tuple<glm::vec3, glm::vec3>
-{
-	auto max = vertices.front();
-	auto min = vertices.front();
-
-	for (auto const& v : vertices)
-		for (auto i = 0; i < 3; ++i)
-			if (v[i] < min[i])
-				min[i] = v[i];
-			else if (v[i] > max[i])
-				max[i] = v[i];
-
-	return std::tie(max, min);
-}
-
-
-
 Mesh::
 Mesh(
-	Type        const  type,
-	std::string const& file
+	Type             const type,
+	std::string_view const file
 	)
 {
-	initialise_transform();
+	reset_transforms();
 	load(type, file);
 }
 
@@ -121,7 +99,9 @@ reset_transforms(
 	)
 	-> void
 {
-	initialise_transform();
+	scale       = glm::vec3(1.0F);
+	position    = glm::vec3(0.0F);
+	orientation = glm::quat();
 }
 
 auto Mesh::
@@ -146,7 +126,7 @@ rotate(
 
 // Matrices
 auto Mesh::
-translation(
+translate_matrix(
 	) const
 	-> glm::mat4
 {
@@ -154,7 +134,7 @@ translation(
 }
 
 auto Mesh::
-rotation(
+rotate_matrix(
 	) const
 	-> glm::mat4
 {
@@ -162,11 +142,32 @@ rotation(
 }
 
 auto Mesh::
-scalar(
+scale_matrix(
 	) const
 	-> glm::mat4
 {
 	return glm::scale(glm::mat4(1.0F), scale);
+}
+
+auto Mesh::
+model_matrix(
+	) const
+	-> glm::mat4
+{
+	return
+		translate_matrix()
+		* rotate_matrix()
+		* scale_matrix();
+}
+
+auto Mesh::
+normal_matrix(
+	) const
+	-> glm::mat3
+{
+	return glm::transpose(glm::inverse(
+		glm::mat3(rotate_matrix())
+		* glm::mat3(scale_matrix())));
 }
 
 
@@ -174,8 +175,8 @@ scalar(
 // Load model or file
 auto Mesh::
 load(
-	Type        const  type,
-	std::string const& file
+	Type             const type,
+	std::string_view const file
 	)
 	-> bool
 {
@@ -187,14 +188,14 @@ load(
 	else if (type == File)
 	{
 		// Load file
-		if (!obj_.load(file))
+		if (!obj_.load(file.data()))
 		{
 			std::cerr << "ERROR: Could not load " <<
 				file << std::endl;
 			return false;
 		}
 
-		initialise_mesh(obj_.get_meshes().front());
+		initialise_obj_mesh(obj_.meshes.front());
 	}
 	else
 	{
@@ -521,7 +522,7 @@ clean(
 	vbo_ = 0;
 	nbo_ = 0;
 	ubo_ = 0;
-	initialise_transform();
+	reset_transforms();
 	shader.reset();
 }
 
@@ -529,17 +530,7 @@ clean(
 
 // Initialise
 auto Mesh::
-initialise_transform(
-	)
-	-> void
-{
-	scale       = glm::vec3(1.0F);
-	position    = glm::vec3(0.0F);
-	orientation = glm::quat();
-}
-
-auto Mesh::
-initialise_mesh(
+initialise_obj_mesh(
 	obj::Mesh const& mesh
 	)
 	-> void

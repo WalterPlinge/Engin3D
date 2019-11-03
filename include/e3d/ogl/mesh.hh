@@ -3,12 +3,14 @@
 #include <cstdint>
 #include <memory>
 #include <string>
+#include <string_view>
 
-#include <glm/mat4x4.hpp>
-#include <glm/vec3.hpp>
+#include <glm/glm.hpp>
 
 #include "../obj/obj.hh"
 #include "shader.hh"
+
+using namespace std::string_view_literals;
 
 namespace ogl
 {
@@ -38,10 +40,10 @@ private:
 	GLuint ubo_ = 0U;
 
 	// Details
-	std::uintmax_t  size_     = 0;
+	std::uintmax_t size_ = 0;
 
 	// Object representation
-	obj::Obj        obj_;
+	obj::Obj obj_;
 
 public:
 
@@ -62,8 +64,8 @@ public:
 	// Constructors
 	explicit
 	Mesh(
-		Type               type = Empty,
-		std::string const& file = std::string()
+		Type             type = Empty,
+		std::string_view file = ""sv
 		);
 
 	~Mesh(
@@ -104,6 +106,11 @@ public:
 
 	// Transforms
 	auto
+	calculate_bounds(
+		)
+		-> void;
+
+	auto
 	reset_transforms(
 		)
 		-> void;
@@ -124,27 +131,37 @@ public:
 
 	// Matrices
 	auto
-	translation(
+	translate_matrix(
 		) const
 		-> glm::mat4;
 
 	auto
-	rotation(
+	rotate_matrix(
 		) const
 		-> glm::mat4;
 
 	auto
-	scalar(
+	scale_matrix(
 		) const
 		-> glm::mat4;
+
+	auto
+	model_matrix(
+		) const
+		-> glm::mat4;
+
+	auto
+	normal_matrix(
+		) const
+		-> glm::mat3;
 
 
 
 	// Load model or file
 	auto
 	load(
-		Type               type = Empty,
-		std::string const& file = std::string()
+		Type             type = Empty,
+		std::string_view file = ""sv
 		)
 		-> bool;
 
@@ -168,12 +185,7 @@ private:
 
 	// Initialise
 	auto
-	initialise_transform(
-		)
-		-> void;
-
-	auto
-	initialise_mesh(
+	initialise_obj_mesh(
 		obj::Mesh const& mesh
 		)
 		-> void;
