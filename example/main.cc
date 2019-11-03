@@ -31,8 +31,8 @@ void setup()
 
 	// Shader
 	lambert = std::make_shared<Shader>("Lambert");
-	lambert->add(GL_VERTEX_SHADER, "resources/shaders/lambert.vert");
-	lambert->add(GL_FRAGMENT_SHADER, "resources/shaders/lambert.frag");
+	lambert->add(GL_VERTEX_SHADER, Shader::File, "resources/shaders/lambert.vert");
+	lambert->add(GL_FRAGMENT_SHADER, Shader::File, "resources/shaders/lambert.frag");
 	lambert->build();
 
 	// Meshes

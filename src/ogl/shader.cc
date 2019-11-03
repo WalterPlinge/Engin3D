@@ -9,21 +9,20 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <utility>
 
-
-
 using namespace std::string_literals;
-using namespace ogl;
+using namespace std::string_view_literals;
 
-
+namespace ogl
+{
 
 // Return contents of file
 auto static
 file_content(
-	std::string const& path
+	std::string_view const path
 	)
 	-> std::optional<std::string>
 {
-	auto file = std::ifstream(path);
+	auto file = std::ifstream(path.data());
 
 	if(file.good())
 		return std::string(std::istreambuf_iterator<char>(file), {});
@@ -52,113 +51,98 @@ Shader::
 
 
 
-// Add shader type, providing code as string or filename
+// Queries
 auto Shader::
-add(
-	GLenum             type,
-	std::string const& code,
-	bool               is_file
-	)
-	-> void
-{
-	auto const content = is_file
-		? file_content(code).value_or(""s)
-		: code;
-
-	auto const shader = compile(type, content);
-
-	if (shader)
-		shaders_.emplace_back(shader);
-}
-
-// Add shader type, providing code as string or filename
-auto Shader::
-add(
-	GLenum            type,
-	code_array const& is_file_code
-	)
-	-> void
-{
-	auto content = std::stringstream{};
-	for (auto const& c : is_file_code)
-	{
-		if (c.first)
-			content << file_content(c.second).value_or(""s);
-		else
-			content << c.second;
-
-		content << '\n';
-	}
-
-	auto const shader = compile(type, content.str());
-
-	if (shader)
-		shaders_.emplace_back(shader);
-}
-
-
-
-// Build shader program
-auto Shader::
-build(
-	)
-	-> bool
-{
-	program_ = glCreateProgram();
-	for (auto const& s : shaders_)
-		glAttachShader(program_, s);
-	glLinkProgram(program_);
-
-
-	// Return if program successfully linked
-	auto success = GLint{};
-	glGetProgramiv(program_, GL_LINK_STATUS, &success);
-	if (success)
-		return program_;
-
-	// Program info log
-	auto log_length = GLint{};
-	glGetProgramiv(program_, GL_INFO_LOG_LENGTH, &log_length);
-
-	auto const log = std::make_unique<char[]>(std::size_t(log_length));
-	glGetProgramInfoLog(program_, log_length, &log_length, log.get());
-
-	std::cerr << "ERROR build failed for shader " <<
-		name << ". Log: " <<
-		log.get() << std::endl;
-
-	// Clean up
-	glDeleteProgram(program_);
-	return program_ = 0;
-}
-
-
-
-// Use shader program
-auto Shader::
-use(
+is_valid(
 	) const
 	-> bool
 {
-	glUseProgram(program_);
-	auto program = GLint{};
-	glGetIntegerv(GL_CURRENT_PROGRAM, &program);
-	return program && program == GLint(program_);
+	return program_ != 0;
+}
+
+auto Shader::
+is_active(
+	) const
+	-> bool
+{
+	auto p = GLint{};
+	glGetIntegerv(GL_CURRENT_PROGRAM, &p);
+	return is_valid() && program_ == GLuint(p);
 }
 
 
 
-// Clean up
+// Add shader code
+auto Shader::
+add(
+	GLenum           const shader_type,
+	CodeType         const code_type,
+	std::string_view const code
+	)
+	-> void
+{
+	auto const content = code_type == Source
+		? std::string(code)
+		: file_content(code).value_or(""s);
+
+	auto const shader = compile(shader_type, content);
+
+	if (shader.has_value())
+		shaders_.emplace_back(shader.value());
+}
+
+auto Shader::
+add(
+	GLenum     const  type,
+	code_array const& code_array
+	)
+	-> void
+{
+	auto content = std::ostringstream{};
+	for (auto const& c : code_array)
+	{
+		if (c.first == Source)
+			content << c.second;
+		else
+			content << file_content(c.second).value_or(""s);
+		content << "\n"sv;
+	}
+
+	add(type, Source, content.str());
+}
+
+
+
+// Management
+auto Shader::
+build(
+	)
+	-> void
+{
+	program_ = link().value_or(0);
+}
+
+auto Shader::
+use(
+	) const
+	-> void
+{
+	glUseProgram(program_);
+}
+
 auto Shader::
 clean(
 	)
 	-> void
 {
-	glUseProgram(0);
+	if (is_active())
+		glUseProgram(0);
 
-	for (auto const& shader : shaders_)
-		glDeleteShader(shader);
+	for (auto const& s : shaders_)
+		glDeleteShader(s);
 	shaders_.clear();
+
+	uniforms_.clear();
 
 	glDeleteProgram(program_);
 	program_ = 0;
@@ -166,33 +150,50 @@ clean(
 
 
 
+// Uniform caching
+auto Shader::
+uniform_location(
+	std::string_view const uniform
+	) const
+	-> GLint
+{
+	if (uniforms_.find(uniform.data()) != uniforms_.end())
+		return uniforms_.at(uniform.data());
+
+	return (uniforms_[uniform.data()] =
+		glGetUniformLocation(
+			program_,
+			uniform.data()));
+}
+
+
+
 // Compile shader
 auto Shader::
 compile(
-	GLenum             type,
-	std::string const& code
+	GLenum           const type,
+	std::string_view const code
 	) const
-	-> GLuint
+	-> std::optional<GLuint>
 {
 	// Shader type
-	auto shader_type = std::string{};
+	auto shader_type = std::string_view();
 	switch (type)
 	{
-		case GL_VERTEX_SHADER:   shader_type = "VERTEX";   break;
-		case GL_FRAGMENT_SHADER: shader_type = "FRAGMENT"; break;
-		default:                 shader_type = "UNKNOWN";  break;
+		case GL_VERTEX_SHADER:   shader_type = "VERTEX"sv;   break;
+		case GL_FRAGMENT_SHADER: shader_type = "FRAGMENT"sv; break;
+		default:                 shader_type = "UNKNOWN"sv;  break;
 	}
 
 	// Create shader ID and pass code pointer for compilation
-	auto const shader_code = code.c_str();
-	auto const shader      = glCreateShader(type);
+	auto const shader = glCreateShader(type);
+	auto const shader_code = code.data();
 	glShaderSource(shader, 1, &shader_code, nullptr);
 	glCompileShader(shader);
 
+	// Return shader ID if successful
 	auto success = GLint{};
 	glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-
-	// Return if shader successfully compiled
 	if (success)
 		return shader;
 
@@ -210,5 +211,39 @@ compile(
 
 	// Clean up
 	glDeleteShader(shader);
-	return 0;
+	return std::nullopt;
 }
+
+auto Shader::
+link(
+	) const
+	-> std::optional<GLuint>
+{
+	auto const program = glCreateProgram();
+	for (auto const& s : shaders_)
+		glAttachShader(program, s);
+	glLinkProgram(program);
+
+	// Returns program ID if successful
+	auto success = GLint{};
+	glGetProgramiv(program, GL_LINK_STATUS, &success);
+	if (success)
+		return program;
+
+	// Get link log
+	auto log_length = GLint{};
+	glGetProgramiv(program, GL_INFO_LOG_LENGTH, &log_length);
+
+	auto const log = std::make_unique<char[]>(std::size_t(log_length));
+	glGetProgramInfoLog(program, log_length, &log_length, log.get());
+
+	std::cerr << "ERROR: build failed for shader " <<
+		name << ". Log: " <<
+		log.get() << std::endl;
+
+	// Clean up
+	glDeleteProgram(program);
+	return std::nullopt;
+}
+
+} // namespace ogl
