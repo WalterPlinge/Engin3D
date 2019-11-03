@@ -60,9 +60,9 @@ void render()
 	// Function to bind common uniforms for a mesh
 	auto const static bind = [](Mesh const& m, Shader const& s)
 	{
-		s.bind("translate", m.translation());
-		s.bind("rotate",    m.rotation());
-		s.bind("scale",     m.scalar());
+		s.bind("translate", m.translate_matrix());
+		s.bind("rotate",    m.rotate_matrix());
+		s.bind("scale",     m.scale_matrix());
 	};
 
 	// Bind camera matrices
