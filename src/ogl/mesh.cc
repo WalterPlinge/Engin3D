@@ -447,7 +447,9 @@ initialise_mesh(
 			auto v = obj::Vertex();
 			v.position = vertices[i];
 			v.normal   = normals[i];
-			v.uv       = uvs[i];
+			// Might not have uvs
+			if (!uvs.empty())
+				v.uv       = uvs[i];
 			obj_.vertices.push_back(v);
 		}
 	}
