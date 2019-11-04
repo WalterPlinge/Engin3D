@@ -3,8 +3,7 @@
 #include <limits>
 
 #define GLM_ENABLE_EXPERIMENTAL
-#include <glm/ext/matrix_transform.hpp>
-#include <glm/gtx/euler_angles.hpp>
+#include <glm/ext.hpp>
 
 
 

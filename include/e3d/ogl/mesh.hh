@@ -117,6 +117,13 @@ public:
 
 	auto
 	rotate(
+		float     angle,
+		glm::vec3 axis
+		)
+		-> void;
+
+	auto
+	rotate(
 		glm::vec3 euler_angles
 		)
 		-> void;

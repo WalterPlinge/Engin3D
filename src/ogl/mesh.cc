@@ -1,12 +1,10 @@
 #include <e3d/ogl/mesh.hh>
 
-#include <algorithm>
-#include <tuple>
-
 #define GLEW_STATIC
 #include <GL/glew.h>
 
-#include <glm/gtc/matrix_transform.hpp>
+#include <glm/ext.hpp>
+
 
 
 namespace ogl
@@ -102,6 +100,21 @@ reset_transforms(
 	scale       = glm::vec3(1.0F);
 	position    = glm::vec3(0.0F);
 	orientation = glm::quat();
+}
+
+auto Mesh::
+rotate(
+	float     const angle,
+	glm::vec3 const axis
+	)
+	-> void
+{
+	auto const a = glm::radians(angle / 2.0F);
+	rotate(glm::quat(
+		axis.x * sinf(a),
+		axis.y * sinf(a),
+		axis.z * sinf(a),
+		cosf(a)));
 }
 
 auto Mesh::

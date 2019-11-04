@@ -1,38 +1,22 @@
 #include <e3d/ogl/shader.hh>
 
-#include <fstream>
 #include <memory>
 #include <optional>
 #include <sstream>
 #include <string>
-
-#include <glm/gtc/type_ptr.hpp>
 #include <utility>
+
+#include <glm/ext.hpp>
+
+#include <luna/files.hh>
 
 using namespace std::string_literals;
 using namespace std::string_view_literals;
 
+
+
 namespace ogl
 {
-
-// Return contents of file
-auto static
-file_content(
-	std::string_view const path
-	)
-	-> std::optional<std::string>
-{
-	auto file = std::ifstream(path.data());
-
-	if(file.good())
-		return std::string(std::istreambuf_iterator<char>(file), {});
-
-	std::cerr << "ERROR: Cannot open shader file " <<
-		path << std::endl;
-	return std::nullopt;
-}
-
-
 
 // Class management
 Shader::
@@ -81,11 +65,9 @@ add(
 	)
 	-> void
 {
-	auto const content = code_type == Source
-		? std::string(code)
-		: file_content(code).value_or(""s);
-
-	auto const shader = compile(shader_type, content);
+	auto const shader = compile(shader_type, code_type == Source
+		? code
+		: luna::read_file(code).value_or(""s));
 
 	if (shader.has_value())
 		shaders_.emplace_back(shader.value());
@@ -104,7 +86,7 @@ add(
 		if (c.first == Source)
 			content << c.second;
 		else
-			content << file_content(c.second).value_or(""s);
+			content << luna::read_file(c.second).value_or(""s);
 		content << "\n"sv;
 	}
 

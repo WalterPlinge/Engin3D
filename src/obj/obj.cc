@@ -1,8 +1,5 @@
 #include <e3d/obj/obj.hh>
 
-#include <algorithm>
-#include <fstream>
-#include <sstream>
 #include <utility>
 
 #define GLM_ENABLE_EXPERIMENTAL

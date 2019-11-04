@@ -1,13 +1,5 @@
 #include <e3d/ogl/app.hh>
 
-#include <chrono>
-#include <functional>
-#include <iostream>
-#include <unordered_map>
-#include <sstream>
-
-#include <glm/gtc/type_ptr.hpp>
-
 #include <e3d/ogl/renderer.hh>
 
 
