@@ -74,6 +74,11 @@ if (NOT TARGET glm)
 	add_subdirectory(lib/glm)
 endif()
 
+# Luna support library
+if (NOT TARGET luna)
+	add_subdirectory(lib/luna)
+endif()
+
 
 
 # Engin3D

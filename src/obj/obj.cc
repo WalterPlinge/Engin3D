@@ -8,28 +8,11 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/ext.hpp>
 
+#include <luna/files.hh>
+#include <luna/strings.hh>
+
 namespace obj
 {
-
-auto static
-split_string(
-	std::string_view str,
-	char const       d
-	)
-	-> std::vector<std::string_view>
-{
-	auto tok = std::vector<std::string_view>();
-	tok.reserve(std::count(str.begin(), str.end(), d) + 1);
-	for (auto l = 0ULL; l != str.npos; str = str.substr(l + 1, str.npos))
-	{
-		if ((l = str.find(d)) && !str.empty())
-		{
-			tok.push_back(str.substr(0, l));
-		}
-	}
-	tok.shrink_to_fit();
-	return tok;
-}
 
 template <class T>
 auto static
@@ -98,7 +81,7 @@ generate_face_vertices(
 	for (auto i = 1U; i < face_tokens.size(); ++i)
 	{
 		// Split vertex tokens
-		auto const tokens = split_string(face_tokens[i], '/');
+		auto const tokens = luna::string_tokens(face_tokens[i], '/');
 
 		auto vertex = Vertex{};
 
@@ -240,16 +223,12 @@ load(
 	// Clear previous data
 	clear();
 
-	// Load file lines into string vector
-	auto lines = std::vector<std::string>();
-	{
-		std::ifstream file(filename.data());
-		if (!file.good())
-			return false;
+	// Load file lines into vector
+	auto const file  = luna::read_file(filename);
+	if (!file.has_value())
+		return false;
 
-		for (std::string line; std::getline(file, line); /**/)
-			lines.push_back(line);
-	}
+	auto const lines = luna::string_tokens(*file, '\n');
 
 
 
@@ -262,9 +241,9 @@ load(
 	auto temp_indices  = std::vector<std::size_t>();
 
 	// Parse tokens for each line
-	for (std::string_view const& line : lines)
+	for (auto const& line : lines)
 	{
-		auto const tokens = split_string(line, ' ');
+		auto const tokens = luna::string_tokens(line, ' ');
 
 		// Skip empty lines
 		if (tokens.empty())

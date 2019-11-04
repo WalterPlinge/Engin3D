@@ -43,6 +43,7 @@ target_link_libraries(Engin3D
 		glm
 		libglew_static
 		glfw
+		luna
 )
 
 target_compile_features(Engin3D
