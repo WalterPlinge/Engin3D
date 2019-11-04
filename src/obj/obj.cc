@@ -1,5 +1,6 @@
 #include <e3d/obj/obj.hh>
 
+#include <algorithm>
 #include <fstream>
 #include <sstream>
 #include <utility>
@@ -12,39 +13,22 @@ namespace obj
 
 auto static
 split_string(
-	std::string_view const string,
-	char             const delim
+	std::string_view str,
+	char const       d
 	)
 	-> std::vector<std::string_view>
 {
-	auto t = std::vector<std::string_view>();
-	auto s = string;
-	for (auto l = 0ULL; l != s.npos; s = s.substr(l + 1, s.npos))
-			if ((l = s.find(delim)))
-				t.push_back(s.substr(0, l));
-	return t;
-	/*auto tokens = std::vector<std::string_view>();
-	auto left  = string;
-	auto start = 0;
-	auto end   = start;
-
-	for (;;)
+	auto tok = std::vector<std::string_view>();
+	tok.reserve(std::count(str.begin(), str.end(), d) + 1);
+	for (auto l = 0ULL; l != str.npos; str = str.substr(l + 1, str.npos))
 	{
-		end = left.find(delim);
-		auto const sub = left.substr(start, end);
-		tokens.push_back(sub);
-		left = left.substr(end, left.size());
+		if ((l = str.find(d)) && !str.empty())
+		{
+			tok.push_back(str.substr(0, l));
+		}
 	}
-
-
-
-	std::vector<std::string> tokens;
-	std::stringstream string_stream(string);
-
-	for (std::string token; std::getline(string_stream, token, delimiter); )
-		tokens.push_back(token);
-
-	return tokens;*/
+	tok.shrink_to_fit();
+	return tok;
 }
 
 template <class T>
