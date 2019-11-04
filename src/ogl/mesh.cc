@@ -195,7 +195,7 @@ load(
 			return false;
 		}
 
-		initialise_obj_mesh(obj_.meshes.front());
+		initialise_obj_mesh();
 	}
 	else
 	{
@@ -406,16 +406,6 @@ load(
 			};
 		}
 
-		size_ = positions.size();
-		for (auto i = 0U; i < size_; ++i)
-		{
-			auto v = obj::Vertex();
-			v.position = positions[i];
-			v.normal   = normals[i];
-			v.uv       = uvs[i];
-			obj_.vertices.push_back(v);
-		}
-
 		// Create mesh
 		initialise_mesh(positions, normals, uvs);
 	}
@@ -433,22 +423,35 @@ initialise_mesh(
 {
 	if (vertices.size() != normals.size())
 	{
-		std::cerr << "ERROR: Vertex and Normal count is unequal" << std::endl;
+		std::cerr <<
+			"ERROR: Vertex and Normal count is unequal" << std::endl;
 		return;
 	}
 
-	// Size and type
-	if (type_ == Empty)
-		type_ = Other;
+	// Make sure there are vertices to use
 	size_ = vertices.size();
-
 	if (size_ == 0)
 	{
 		std::cerr << "ERROR: No vertices supplied" << std::endl;
 		return;
 	}
 
-	// Limits
+	if (type_ == Empty)
+		type_ = Other;
+
+	// Make sure obj has vertices for bounds calculation
+	if (obj_.vertices.empty())
+	{
+		for (auto i = 0U; i < size_; ++i)
+		{
+			auto v = obj::Vertex();
+			v.position = vertices[i];
+			v.normal   = normals[i];
+			v.uv       = uvs[i];
+			obj_.vertices.push_back(v);
+		}
+	}
+
 	calculate_bounds();
 
 
@@ -531,11 +534,10 @@ clean(
 // Initialise
 auto Mesh::
 initialise_obj_mesh(
-	obj::Mesh const& mesh
 	)
 	-> void
 {
-	size_ = mesh.vertices.size();
+	size_ = obj_.vertices.size();
 
 	// Get positions and normals
 	auto positions = std::vector<glm::vec3>();
@@ -546,7 +548,7 @@ initialise_obj_mesh(
 	normals.reserve(size_);
 	uvs.reserve(size_);
 
-	for (auto const& v : mesh.vertices)
+	for (auto const& v : obj_.vertices)
 	{
 		positions.push_back(v.position);
 		normals.push_back(v.normal);

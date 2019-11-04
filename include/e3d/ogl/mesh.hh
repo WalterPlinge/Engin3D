@@ -186,7 +186,6 @@ private:
 	// Initialise
 	auto
 	initialise_obj_mesh(
-		obj::Mesh const& mesh
 		)
 		-> void;
 };
