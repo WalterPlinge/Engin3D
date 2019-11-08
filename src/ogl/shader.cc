@@ -1,9 +1,7 @@
 #include <e3d/ogl/shader.hh>
 
 #include <memory>
-#include <optional>
 #include <sstream>
-#include <string>
 #include <utility>
 
 #include <glm/ext.hpp>
