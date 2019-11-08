@@ -289,7 +289,7 @@ target(
 	-> void
 {
 	if (framebuffer.has_value())
-		glBindFramebuffer(GL_FRAMEBUFFER, framebuffer->buffer());
+		glBindFramebuffer(GL_FRAMEBUFFER, framebuffer->id());
 	else
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }

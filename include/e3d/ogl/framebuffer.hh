@@ -1,5 +1,8 @@
 #pragma once
 
+#include <optional>
+#include <unordered_map>
+
 #define GLEW_STATIC
 #include <GL/glew.h>
 
@@ -10,11 +13,13 @@ namespace ogl
 
 class Framebuffer
 {
-	GLuint  buffer_;
-	GLuint  width_;
-	GLuint  height_;
-	Texture frame_;
-	Texture depth_;
+	GLuint                 id_;
+	GLuint                 width_;
+	GLuint                 height_;
+
+	std::unordered_map<std::size_t, Texture> colour_;
+	std::optional<Texture>                   depth_;
+//	std::optional<Texture>                   stencil_;
 
 public:
 
@@ -27,9 +32,11 @@ public:
 	~Framebuffer(
 		);
 
+
+
 	// Details
 	auto
-	buffer(
+	id(
 		) const
 		-> GLuint;
 
@@ -43,20 +50,96 @@ public:
 		) const
 		-> GLuint;
 
+
+
+	// Behaviour
 	auto
-	frame(
+	bind(
 		) const
-		-> Texture const&;
+		-> void;
 
 	auto
-	depth(
+	unbind(
 		) const
-		-> Texture const&;
+		-> void;
 
 	auto
 	is_valid(
 		) const
 		-> bool;
+
+
+
+	// Attachments
+	auto
+	frames(
+		) const
+		-> std::unordered_map<std::size_t, Texture> const&;
+
+	auto
+	frame(
+		std::size_t index
+		) const
+		-> std::optional<Texture const*>;
+
+	auto
+	depth(
+		) const
+		-> std::optional<Texture> const&;
+
+	auto
+	stencil(
+		) const
+		-> std::optional<Texture> const&;
+
+
+
+	// Add attachments
+	auto
+	add_frame(
+		std::size_t index,
+		GLint       internal_format,
+		GLenum      data_format,
+		GLenum      data_type
+		)
+		-> void;
+
+	auto
+	add_depth(
+		)
+		-> void;
+
+//	auto
+//	add_stencil(
+//		)
+//		-> void;
+
+
+
+	// Remove attachments
+	auto
+	remove_frame(
+		std::size_t index
+		)
+		-> void;
+
+	auto
+	remove_depth(
+		)
+		-> void;
+
+//	auto
+//	remove_stencil(
+//		)
+//		-> void;
+
+private:
+
+	// Update buffer with current attachments
+	auto
+	update_draw_buffers(
+		) const
+		-> void;
 };
 
 } // namespace ogl
