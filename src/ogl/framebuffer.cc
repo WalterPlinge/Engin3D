@@ -247,7 +247,7 @@ update_draw_buffers(
 	auto draw_buffers = std::vector<GLenum>();
 	draw_buffers.reserve(colour_.size());
 	for (auto const& c : colour_)
-		draw_buffers.push_back(c.first);
+		draw_buffers.push_back(GL_COLOR_ATTACHMENT0 + c.first);
 	glDrawBuffers(draw_buffers.size(), draw_buffers.data());
 
 	unbind();
