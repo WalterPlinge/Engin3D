@@ -94,7 +94,7 @@ bind(
 
 auto
 target(
-	Framebuffer const* framebuffer = nullptr
+	std::optional<Framebuffer const*> framebuffer = std::nullopt
 	)
 	-> void;
 

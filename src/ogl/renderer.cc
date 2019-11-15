@@ -284,14 +284,14 @@ bind(
 
 auto
 target(
-	Framebuffer const* const framebuffer
+	std::optional<Framebuffer const*> const framebuffer
 	)
 	-> void
 {
 	glBindFramebuffer(
 		GL_FRAMEBUFFER,
-		framebuffer
-			? framebuffer->id()
+		framebuffer.has_value()
+			? framebuffer.value()->id()
 			: 0);
 }
 
