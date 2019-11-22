@@ -93,6 +93,11 @@ public:
 		-> GLuint;
 
 	auto
+	uniforms(
+		) const
+		-> uniform_cache const&;
+
+	auto
 	is_valid(
 		) const
 		-> bool;

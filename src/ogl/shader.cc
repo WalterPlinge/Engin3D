@@ -43,6 +43,14 @@ id(
 }
 
 auto Shader::
+uniforms(
+	) const
+	-> uniform_cache const&
+{
+	return uniforms_;
+}
+
+auto Shader::
 is_valid(
 	) const
 	-> bool
