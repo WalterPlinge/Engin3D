@@ -35,6 +35,14 @@ Shader::
 
 // Queries
 auto Shader::
+id(
+	) const
+	-> GLuint
+{
+	return program_;
+}
+
+auto Shader::
 is_valid(
 	) const
 	-> bool

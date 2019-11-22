@@ -88,6 +88,11 @@ public:
 
 	// Queries
 	auto
+	id(
+		) const
+		-> GLuint;
+
+	auto
 	is_valid(
 		) const
 		-> bool;
