@@ -41,9 +41,9 @@ private:
 
 
 	// Details
-	GLuint                program_ = 0;
-	std::vector<GLuint>   shaders_;
-	uniform_cache mutable uniforms_;
+	GLuint              program_ = 0;
+	std::vector<GLuint> shaders_;
+	uniform_cache       uniforms_;
 
 public:
 
@@ -145,6 +145,14 @@ public:
 		-> void;
 
 private:
+
+	// Caching
+	auto
+	generate_uniform_cache(
+		)
+		-> void;
+
+
 
 	// Program building
 	auto
