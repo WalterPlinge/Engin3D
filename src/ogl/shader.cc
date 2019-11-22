@@ -60,6 +60,21 @@ is_active(
 	return is_valid() && program_ == GLuint(p);
 }
 
+auto Shader::
+uniform_location(
+	std::string_view const uniform
+	) const
+	-> GLint
+{
+	if (uniforms_.find(uniform.data()) != uniforms_.end())
+		return uniforms_.at(uniform.data());
+
+	return (uniforms_[uniform.data()] =
+		glGetUniformLocation(
+			program_,
+			uniform.data()));
+}
+
 
 
 // Add shader code
@@ -134,24 +149,6 @@ clean(
 
 	glDeleteProgram(program_);
 	program_ = 0;
-}
-
-
-
-// Uniform caching
-auto Shader::
-uniform_location(
-	std::string_view const uniform
-	) const
-	-> GLint
-{
-	if (uniforms_.find(uniform.data()) != uniforms_.end())
-		return uniforms_.at(uniform.data());
-
-	return (uniforms_[uniform.data()] =
-		glGetUniformLocation(
-			program_,
-			uniform.data()));
 }
 
 

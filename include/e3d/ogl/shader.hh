@@ -102,6 +102,12 @@ public:
 		) const
 		-> bool;
 
+	auto
+	uniform_location(
+		std::string_view uniform
+		) const
+		-> GLint;
+
 
 
 	// Add shader code
@@ -139,15 +145,6 @@ public:
 		-> void;
 
 private:
-
-	// Uniform caching
-	auto
-	uniform_location(
-		std::string_view uniform
-		) const
-		-> GLint;
-
-
 
 	// Program building
 	auto
