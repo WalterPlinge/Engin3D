@@ -1,5 +1,6 @@
 #include "e3d/ogl/camera.hh"
 
+#include <functional>
 #include <limits>
 
 #define GLM_ENABLE_EXPERIMENTAL
@@ -108,30 +109,21 @@ move(
 	)
 	-> void
 {
-	// Calculate velocity in relation to delta_time and apply boost
-	auto velocity = speed;
-	if (boost)
-		velocity *= 5.0F;
-	velocity *= delta_time;
+	auto const b = !boost ? 1.0F : 5.0F;
+	auto const v = speed * b * delta_time;
 
-	// Translate position by coresponding vector scaled by speed
-	if (direction == Right)
-		position += right_ * velocity;
+	std::function<glm::vec3()>
+	const static move_in[] =
+	{
+		[Right   ] = [&](){ return  right_ * v; },
+		[Left    ] = [&](){ return -right_ * v; },
+		[Forward ] = [&](){ return  front_ * v; },
+		[Backward] = [&](){ return -front_ * v; },
+		[Up      ] = [&](){ return  up_    * v; },
+		[Down    ] = [&](){ return -up_    * v; }
+	};
 
-	else if (direction == Left)
-		position -= right_ * velocity;
-
-	else if (direction == Forward)
-		position += front_ * velocity;
-
-	else if (direction == Backward)
-		position -= front_ * velocity;
-
-	else if (direction == Up)
-		position += up_ * velocity;
-
-	else if (direction == Down)
-		position -= up_ * velocity;
+	position += move_in[direction]();
 }
 
 

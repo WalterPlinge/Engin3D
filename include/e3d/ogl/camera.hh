@@ -7,6 +7,20 @@ namespace ogl
 
 class Camera
 {
+public:
+
+	enum Move
+	{
+		Right,
+		Left,
+		Forward,
+		Backward,
+		Up,
+		Down
+	};
+
+private:
+
 	// World vectors
 	glm::vec3 const static world_right_;
 	glm::vec3 const static world_front_;
@@ -39,18 +53,6 @@ private:
 	glm::vec3 up_    = glm::vec3(0.0F, 0.0F, 1.0F);
 
 public:
-
-	enum Move
-	{
-		Right,
-		Left,
-		Forward,
-		Backward,
-		Up,
-		Down
-	};
-
-
 
 	// Constructor
 	explicit
