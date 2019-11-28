@@ -9,6 +9,7 @@ set(HEADER_FILES
 	${OGL_DIR}/app.hh
 	${OGL_DIR}/camera.hh
 	${OGL_DIR}/framebuffer.hh
+	${OGL_DIR}/geometry.hh
 	${OGL_DIR}/mesh.hh
 	${OGL_DIR}/renderer.hh
 	${OGL_DIR}/shader.hh
@@ -22,6 +23,7 @@ set(SOURCE_FILES
 	ogl/app.cc
 	ogl/camera.cc
 	ogl/framebuffer.cc
+	ogl/geometry.cc
 	ogl/mesh.cc
 	ogl/renderer.cc
 	ogl/shader.cc

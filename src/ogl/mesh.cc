@@ -1,9 +1,13 @@
 #include <e3d/ogl/mesh.hh>
 
+#include <functional>
+
 #define GLEW_STATIC
 #include <GL/glew.h>
 
 #include <glm/ext.hpp>
+
+#include <e3d/ogl/geometry.hh>
 
 
 
@@ -194,233 +198,45 @@ load(
 	-> bool
 {
 	type_ = type;
-	if (type == Empty)
+	switch (type)
 	{
-		clean();
-	}
-	else if (type == File)
-	{
-		// Load file
-		if (!obj_.load(file.data()))
+		case Empty:
 		{
-			std::cerr << "ERROR: Could not load " <<
-				file << std::endl;
+			clean();
+			break;
+		}
+
+		case File:
+		{
+			if (!obj_.load(file))
+			{
+				std::cerr << "ERROR: Could not load " <<
+					file << std::endl;
+				return false;
+			}
+			initialise_obj_mesh();
+			break;
+		}
+
+		case Other:
+		{
+			std::cerr << "ERROR: Cannot create Mesh of type 'Other'" << std::endl;
 			return false;
 		}
 
-		initialise_obj_mesh();
-	}
-	else
-	{
-		auto positions = std::vector<glm::vec3>();
-		auto normals   = std::vector<glm::vec3>();
-		auto uvs       = std::vector<glm::vec2>();
-
-		// Calculate data for type
-		if (type == Triangle)
+		default:
 		{
-			positions = {
-				glm::vec3( 0.0F, 0.0F,  1.0F),
-				glm::vec3(-1.0F, 0.0F, -1.0F),
-				glm::vec3( 1.0F, 0.0F, -1.0F)
+			std::function<geometry::Geometry()>
+			const static geom_of[]
+			{
+				[Triangle] = geometry::triangle,
+				[Quad    ] = geometry::quad,
+				[Cube    ] = geometry::cube
 			};
-
-			normals = {
-				glm::vec3(0.0F, -1.0F, 0.0F),
-				glm::vec3(0.0F, -1.0F, 0.0F),
-				glm::vec3(0.0F, -1.0F, 0.0F)
-			};
-
-			uvs = {
-				glm::vec2(0.5F, 1.0F),
-				glm::vec2(0.0F, 0.0F),
-				glm::vec2(1.0F, 0.0F)
-			};
+			auto const [p, n, t] = geom_of[type]();
+			initialise_mesh(p, n, t);
+			break;
 		}
-		else if (type == Quad)
-		{
-			positions = {
-				glm::vec3( 1.0F,  1.0F, 0.0F),
-				glm::vec3(-1.0F,  1.0F, 0.0F),
-				glm::vec3(-1.0F, -1.0F, 0.0F),
-				glm::vec3(-1.0F, -1.0F, 0.0F),
-				glm::vec3( 1.0F, -1.0F, 0.0F),
-				glm::vec3( 1.0F,  1.0F, 0.0F),
-			};
-
-			normals = {
-				glm::vec3(0.0F, 0.0F, 1.0F),
-				glm::vec3(0.0F, 0.0F, 1.0F),
-				glm::vec3(0.0F, 0.0F, 1.0F),
-				glm::vec3(0.0F, 0.0F, 1.0F),
-				glm::vec3(0.0F, 0.0F, 1.0F),
-				glm::vec3(0.0F, 0.0F, 1.0F)
-			};
-
-			uvs = {
-				glm::vec2(1.0F, 1.0F),
-				glm::vec2(0.0F, 1.0F),
-				glm::vec2(0.0F, 0.0F),
-				glm::vec2(0.0F, 0.0F),
-				glm::vec2(1.0F, 0.0F),
-				glm::vec2(1.0F, 1.0F)
-			};
-		}
-		else if (type == Cube)
-		{
-			positions = {
-				// RIGHT
-				glm::vec3(1.0F,  1.0F,  1.0F),
-				glm::vec3(1.0F, -1.0F,  1.0F),
-				glm::vec3(1.0F, -1.0F, -1.0F),
-				glm::vec3(1.0F, -1.0F, -1.0F),
-				glm::vec3(1.0F,  1.0F, -1.0F),
-				glm::vec3(1.0F,  1.0F,  1.0F),
-
-				// BACK
-				glm::vec3( 1.0F, 1.0F,  1.0F),
-				glm::vec3( 1.0F, 1.0F, -1.0F),
-				glm::vec3(-1.0F, 1.0F, -1.0F),
-				glm::vec3(-1.0F, 1.0F, -1.0F),
-				glm::vec3(-1.0F, 1.0F,  1.0F),
-				glm::vec3( 1.0F, 1.0F,  1.0F),
-
-				// TOP
-				glm::vec3( 1.0F,  1.0F, 1.0F),
-				glm::vec3(-1.0F,  1.0F, 1.0F),
-				glm::vec3(-1.0F, -1.0F, 1.0F),
-				glm::vec3(-1.0F, -1.0F, 1.0F),
-				glm::vec3( 1.0F, -1.0F, 1.0F),
-				glm::vec3( 1.0F,  1.0F, 1.0F),
-
-				// LEFT
-				glm::vec3(-1.0F,  1.0F,  1.0F),
-				glm::vec3(-1.0F,  1.0F, -1.0F),
-				glm::vec3(-1.0F, -1.0F, -1.0F),
-				glm::vec3(-1.0F, -1.0F, -1.0F),
-				glm::vec3(-1.0F, -1.0F,  1.0F),
-				glm::vec3(-1.0F,  1.0F,  1.0F),
-
-				// FRONT
-				glm::vec3( 1.0F, -1.0F,  1.0F),
-				glm::vec3(-1.0F, -1.0F,  1.0F),
-				glm::vec3(-1.0F, -1.0F, -1.0F),
-				glm::vec3(-1.0F, -1.0F, -1.0F),
-				glm::vec3( 1.0F, -1.0F, -1.0F),
-				glm::vec3( 1.0F, -1.0F,  1.0F),
-
-				// BOTTOM
-				glm::vec3( 1.0F,  1.0F, -1.0F),
-				glm::vec3( 1.0F, -1.0F, -1.0F),
-				glm::vec3(-1.0F, -1.0F, -1.0F),
-				glm::vec3(-1.0F, -1.0F, -1.0F),
-				glm::vec3(-1.0F,  1.0F, -1.0F),
-				glm::vec3( 1.0F,  1.0F, -1.0F)
-			};
-
-			normals = {
-				// RIGHT
-				glm::vec3(1.0F, 0.0F, 0.0F),
-				glm::vec3(1.0F, 0.0F, 0.0F),
-				glm::vec3(1.0F, 0.0F, 0.0F),
-				glm::vec3(1.0F, 0.0F, 0.0F),
-				glm::vec3(1.0F, 0.0F, 0.0F),
-				glm::vec3(1.0F, 0.0F, 0.0F),
-
-				// BACK
-				glm::vec3(0.0F, 1.0F, 0.0F),
-				glm::vec3(0.0F, 1.0F, 0.0F),
-				glm::vec3(0.0F, 1.0F, 0.0F),
-				glm::vec3(0.0F, 1.0F, 0.0F),
-				glm::vec3(0.0F, 1.0F, 0.0F),
-				glm::vec3(0.0F, 1.0F, 0.0F),
-
-				// TOP
-				glm::vec3(0.0F, 0.0F, 1.0F),
-				glm::vec3(0.0F, 0.0F, 1.0F),
-				glm::vec3(0.0F, 0.0F, 1.0F),
-				glm::vec3(0.0F, 0.0F, 1.0F),
-				glm::vec3(0.0F, 0.0F, 1.0F),
-				glm::vec3(0.0F, 0.0F, 1.0F),
-
-				// LEFT
-				glm::vec3(-1.0F, 0.0F, 0.0F),
-				glm::vec3(-1.0F, 0.0F, 0.0F),
-				glm::vec3(-1.0F, 0.0F, 0.0F),
-				glm::vec3(-1.0F, 0.0F, 0.0F),
-				glm::vec3(-1.0F, 0.0F, 0.0F),
-				glm::vec3(-1.0F, 0.0F, 0.0F),
-
-				// FRONT
-				glm::vec3(0.0F, -1.0F, 0.0F),
-				glm::vec3(0.0F, -1.0F, 0.0F),
-				glm::vec3(0.0F, -1.0F, 0.0F),
-				glm::vec3(0.0F, -1.0F, 0.0F),
-				glm::vec3(0.0F, -1.0F, 0.0F),
-				glm::vec3(0.0F, -1.0F, 0.0F),
-
-				// BOTTOM
-				glm::vec3(0.0F, 0.0F, -1.0F),
-				glm::vec3(0.0F, 0.0F, -1.0F),
-				glm::vec3(0.0F, 0.0F, -1.0F),
-				glm::vec3(0.0F, 0.0F, -1.0F),
-				glm::vec3(0.0F, 0.0F, -1.0F),
-				glm::vec3(0.0F, 0.0F, -1.0F)
-			};
-
-			uvs = {
-				// RIGHT
-				glm::vec2(1.0F, 1.0F),
-				glm::vec2(0.0F, 1.0F),
-				glm::vec2(0.0F, 0.0F),
-				glm::vec2(0.0F, 0.0F),
-				glm::vec2(1.0F, 0.0F),
-				glm::vec2(1.0F, 1.0F),
-
-				// BACK
-				glm::vec2(1.0F, 1.0F),
-				glm::vec2(0.0F, 1.0F),
-				glm::vec2(0.0F, 0.0F),
-				glm::vec2(0.0F, 0.0F),
-				glm::vec2(1.0F, 0.0F),
-				glm::vec2(1.0F, 1.0F),
-
-				// TOP
-				glm::vec2(1.0F, 1.0F),
-				glm::vec2(0.0F, 1.0F),
-				glm::vec2(0.0F, 0.0F),
-				glm::vec2(0.0F, 0.0F),
-				glm::vec2(1.0F, 0.0F),
-				glm::vec2(1.0F, 1.0F),
-
-				// LEFT
-				glm::vec2(1.0F, 1.0F),
-				glm::vec2(0.0F, 1.0F),
-				glm::vec2(0.0F, 0.0F),
-				glm::vec2(0.0F, 0.0F),
-				glm::vec2(1.0F, 0.0F),
-				glm::vec2(1.0F, 1.0F),
-
-				// FRONT
-				glm::vec2(1.0F, 1.0F),
-				glm::vec2(0.0F, 1.0F),
-				glm::vec2(0.0F, 0.0F),
-				glm::vec2(0.0F, 0.0F),
-				glm::vec2(1.0F, 0.0F),
-				glm::vec2(1.0F, 1.0F),
-
-				// BOTTOM
-				glm::vec2(1.0F, 1.0F),
-				glm::vec2(0.0F, 1.0F),
-				glm::vec2(0.0F, 0.0F),
-				glm::vec2(0.0F, 0.0F),
-				glm::vec2(1.0F, 0.0F),
-				glm::vec2(1.0F, 1.0F),
-			};
-		}
-
-		// Create mesh
-		initialise_mesh(positions, normals, uvs);
 	}
 
 	return true;

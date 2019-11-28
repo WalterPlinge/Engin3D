@@ -21,11 +21,11 @@ public:
 	// Base types
 	enum Type {
 		Empty,
+		File,
+		Other,
 		Triangle,
 		Quad,
-		Cube,
-		File,
-		Other
+		Cube
 	};
 
 private:
