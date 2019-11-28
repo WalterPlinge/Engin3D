@@ -13,10 +13,10 @@
 
 #include <glm/glm.hpp>
 
-#include "camera.hh"
-#include "framebuffer.hh"
-#include "mesh.hh"
-#include "texture.hh"
+#include <e3d/ogl/camera.hh>
+#include <e3d/ogl/framebuffer.hh>
+#include <e3d/ogl/mesh.hh>
+#include <e3d/ogl/texture.hh>
 
 namespace ogl::renderer
 {

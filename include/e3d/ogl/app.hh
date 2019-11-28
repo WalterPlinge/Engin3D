@@ -2,7 +2,7 @@
 
 #include <functional>
 
-#include "renderer.hh"
+#include <e3d/ogl/renderer.hh>
 
 namespace ogl::app
 {

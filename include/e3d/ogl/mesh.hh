@@ -2,13 +2,12 @@
 
 #include <cstdint>
 #include <memory>
-#include <string>
 #include <string_view>
 
 #include <glm/glm.hpp>
 
-#include "../obj/obj.hh"
-#include "shader.hh"
+#include <e3d/obj/obj.hh>
+#include <e3d/ogl/shader.hh>
 
 using namespace std::string_view_literals;
 
