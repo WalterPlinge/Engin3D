@@ -1,5 +1,8 @@
 #include <e3d/ogl/app.hh>
 
+#include <utility>
+#include <vector>
+
 #include <e3d/ogl/renderer.hh>
 
 
@@ -64,23 +67,19 @@ fixed_update(
 	)
 	-> void
 {
-	if (renderer::keyboard()[GLFW_KEY_W])
-		renderer::camera.move(Camera::Forward, delta_time);
+	auto const static movements = std::vector<std::pair<Camera::Move, GLenum>>
+	{
+		{ Camera::Right,    GLFW_KEY_D },
+		{ Camera::Left,     GLFW_KEY_A },
+		{ Camera::Forward,  GLFW_KEY_W },
+		{ Camera::Backward, GLFW_KEY_S },
+		{ Camera::Up,       GLFW_KEY_SPACE },
+		{ Camera::Down,     GLFW_KEY_LEFT_SHIFT }
+	};
 
-	if (renderer::keyboard()[GLFW_KEY_A])
-		renderer::camera.move(Camera::Left, delta_time);
-
-	if (renderer::keyboard()[GLFW_KEY_S])
-		renderer::camera.move(Camera::Backward, delta_time);
-
-	if (renderer::keyboard()[GLFW_KEY_D])
-		renderer::camera.move(Camera::Right, delta_time);
-
-	if (renderer::keyboard()[GLFW_KEY_SPACE])
-		renderer::camera.move(Camera::Up, delta_time);
-
-	if (renderer::keyboard()[GLFW_KEY_LEFT_SHIFT])
-		renderer::camera.move(Camera::Down, delta_time);
+	for (auto const& m : movements)
+		if (renderer::keyboard()[m.second])
+			renderer::camera.move(m.first, delta_time);
 
 	fixed_update_function(delta_time);
 }
