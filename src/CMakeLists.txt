@@ -48,7 +48,7 @@ target_link_libraries(Engin3D
 
 target_compile_features(Engin3D
 	PUBLIC
-		cxx_std_17
+		cxx_std_20
 )
 
 source_group(TREE

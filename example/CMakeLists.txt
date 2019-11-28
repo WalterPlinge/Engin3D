@@ -7,7 +7,7 @@ target_link_libraries(Engin3D_Example
 
 target_compile_features(Engin3D_Example
 	PUBLIC
-		cxx_std_17
+		cxx_std_20
 )
 
 set_target_properties(Engin3D_Example
