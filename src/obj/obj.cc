@@ -15,7 +15,7 @@ template <class T>
 auto static
 get_element(
 	std::vector<T> const& list,
-	std::intmax_t  const& index
+	std::intmax_t         index
 	)
 	-> T
 {
@@ -78,7 +78,7 @@ generate_face_vertices(
 	for (auto i = 1U; i < face_tokens.size(); ++i)
 	{
 		// Split vertex tokens
-		auto const tokens = luna::string_tokens(face_tokens[i], '/');
+		auto const tokens = luna::split_string(face_tokens[i], '/');
 
 		auto vertex = Vertex{};
 
@@ -225,7 +225,7 @@ load(
 	if (!file.has_value())
 		return false;
 
-	auto const lines = luna::string_tokens(*file, '\n');
+	auto const lines = luna::split_string(*file, '\n');
 
 
 
@@ -240,7 +240,7 @@ load(
 	// Parse tokens for each line
 	for (auto const& line : lines)
 	{
-		auto const tokens = luna::string_tokens(line, ' ');
+		auto const tokens = luna::split_string(line);
 
 		// Skip empty lines
 		if (tokens.empty())
