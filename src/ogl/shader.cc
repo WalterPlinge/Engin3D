@@ -35,6 +35,22 @@ Shader::
 
 // Queries
 auto Shader::
+id(
+	) const
+	-> GLuint
+{
+	return program_;
+}
+
+auto Shader::
+uniforms(
+	) const
+	-> uniform_cache const&
+{
+	return uniforms_;
+}
+
+auto Shader::
 is_valid(
 	) const
 	-> bool
@@ -50,6 +66,15 @@ is_active(
 	auto p = GLint{};
 	glGetIntegerv(GL_CURRENT_PROGRAM, &p);
 	return is_valid() && program_ == GLuint(p);
+}
+
+auto Shader::
+uniform_location(
+	std::string_view const uniform
+	) const
+	-> GLint
+{
+	return uniforms_.at(std::string(uniform));
 }
 
 

@@ -88,6 +88,16 @@ public:
 
 	// Queries
 	auto
+	id(
+		) const
+		-> GLuint;
+
+	auto
+	uniforms(
+		) const
+		-> uniform_cache const&;
+
+	auto
 	is_valid(
 		) const
 		-> bool;
@@ -96,6 +106,12 @@ public:
 	is_active(
 		) const
 		-> bool;
+
+	auto
+	uniform_location(
+		std::string_view uniform
+		) const
+		-> GLint;
 
 
 
