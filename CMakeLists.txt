@@ -40,17 +40,17 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME OR ENGIN3D_BUILD_SETTINGS)
 	set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 	set(GLM_TEST_ENABLE   OFF CACHE BOOL "" FORCE)
 
+
+
+	### Resources
+	add_custom_target(copy_resources ALL
+		COMMAND ${CMAKE_COMMAND} -E
+		copy_directory
+			${CMAKE_SOURCE_DIR}/resources
+			${CMAKE_BINARY_DIR}/bin/resources
+	)
+
 endif()
-
-
-
-### Resources
-#add_custom_target(copy_resources ALL
-#	COMMAND ${CMAKE_COMMAND} -E
-#	copy_directory
-#		${CMAKE_SOURCE_DIR}/resources
-#		${CMAKE_BINARY_DIR}/bin/resources
-#)
 
 
 
