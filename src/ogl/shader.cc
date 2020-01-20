@@ -68,15 +68,6 @@ is_active(
 	return is_valid() && program_ == GLuint(p);
 }
 
-auto Shader::
-uniform_location(
-	std::string_view const uniform
-	) const
-	-> GLint
-{
-	return uniforms_.at(std::string(uniform));
-}
-
 
 
 // Add shader code
