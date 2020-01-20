@@ -226,14 +226,27 @@ load(
 
 		default:
 		{
-			std::function<geometry::Geometry()>
-			const static geom_of[]
+			/*std::function<geometry::Geometry(void)>
+			const static geom_of[] =
 			{
 				[Triangle] = geometry::triangle,
 				[Quad    ] = geometry::quad,
-				[Cube    ] = geometry::cube
+				[Cube    ] = geometry::cube,
+			};*/
+			// @CompilerSupport: Non-trivial designated initializers not supported by GCC
+			auto constexpr static geom_of = [](
+				Type const t
+				) -> std::function<geometry::Geometry(void)>
+			{
+				if (t == Triangle)
+					return geometry::triangle;
+				if (t == Quad)
+					return geometry::quad;
+				if (t == Cube)
+					return geometry::cube;
+				return geometry::triangle;
 			};
-			auto const [p, n, t] = geom_of[type]();
+			auto const [p, n, t] = geom_of(type)();
 			initialise_mesh(p, n, t);
 			break;
 		}
@@ -278,7 +291,7 @@ initialise_mesh(
 			v.normal   = normals[i];
 			// Might not have uvs
 			if (!uvs.empty())
-				v.uv       = uvs[i];
+				v.uv = uvs[i];
 			obj_.vertices.push_back(v);
 		}
 	}
