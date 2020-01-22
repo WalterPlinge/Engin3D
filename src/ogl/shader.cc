@@ -68,6 +68,15 @@ is_active(
 	return is_valid() && program_ == GLuint(p);
 }
 
+auto Shader::
+uniform_location(
+	std::string_view const uniform
+	) const
+	-> GLint
+{
+	return uniforms_.at(std::string(uniform));
+}
+
 
 
 // Add shader code
@@ -81,7 +90,7 @@ add(
 {
 	auto const shader = compile(shader_type, code_type == Source
 		? code
-		: luna::read_file(code).value_or(""s));
+		: luna::read_file(code).value_or("\n"s));
 
 	if (shader.has_value())
 		shaders_.emplace_back(shader.value());
@@ -116,6 +125,8 @@ build(
 	-> void
 {
 	program_ = link().value_or(0);
+	if (program_)
+		generate_uniform_cache();
 }
 
 auto Shader::
@@ -146,20 +157,40 @@ clean(
 
 
 
-// Uniform caching
+// Caching
 auto Shader::
-uniform_location(
-	std::string_view const uniform
-	) const
-	-> GLint
+generate_uniform_cache(
+	)
+	-> void
 {
-	if (uniforms_.find(uniform.data()) != uniforms_.end())
-		return uniforms_.at(uniform.data());
+	use();
 
-	return (uniforms_[uniform.data()] =
-		glGetUniformLocation(
+	uniforms_.clear();
+
+	auto max_uniform_name = GLint{};
+	glGetProgramiv(program_, GL_ACTIVE_UNIFORM_MAX_LENGTH, &max_uniform_name);
+
+	auto uniform_count = GLint{};
+	glGetProgramiv(program_, GL_ACTIVE_UNIFORMS, &uniform_count);
+
+	auto const name = std::make_unique<char[]>(max_uniform_name);
+
+	auto size = GLint{};
+	auto type = GLenum{};
+	for (auto i = 0; i < uniform_count; ++i)
+	{
+		glGetActiveUniform(
 			program_,
-			uniform.data()));
+			i,
+			max_uniform_name,
+			nullptr,
+			&size,
+			&type,
+			name.get());
+
+		auto const location = glGetUniformLocation(program_, name.get());
+		uniforms_.emplace(name.get(), location);
+	}
 }
 
 
