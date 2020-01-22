@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <optional>
 #include <unordered_map>
 
@@ -13,13 +14,13 @@ namespace ogl
 
 class Framebuffer
 {
-	GLuint                 id_;
-	GLuint                 width_;
-	GLuint                 height_;
+	GLuint id_;
+	GLuint width_;
+	GLuint height_;
 
-	std::unordered_map<std::size_t, Texture> colour_;
-	std::optional<Texture>                   depth_;
-//	std::optional<Texture>                   stencil_;
+	std::unordered_map<std::size_t, std::unique_ptr<Texture>> colour_;
+	std::optional<std::unique_ptr<Texture>>                   depth_;
+///	std::optional<std::unique_ptr<Texture>>                   stencil_;
 
 public:
 
@@ -74,7 +75,7 @@ public:
 	auto
 	frames(
 		) const
-		-> std::unordered_map<std::size_t, Texture> const&;
+		-> std::unordered_map<std::size_t, std::unique_ptr<Texture>> const&;
 
 	auto
 	frame(
@@ -85,12 +86,12 @@ public:
 	auto
 	depth(
 		) const
-		-> std::optional<Texture> const&;
+		-> std::optional<std::unique_ptr<Texture>> const&;
 
-	auto
-	stencil(
-		) const
-		-> std::optional<Texture> const&;
+///	auto
+///	stencil(
+///		) const
+///		-> std::optional<std::unique_ptr<Texture>> const&;
 
 
 
@@ -109,10 +110,10 @@ public:
 		)
 		-> void;
 
-//	auto
-//	add_stencil(
-//		)
-//		-> void;
+///	auto
+///	add_stencil(
+///		)
+///		-> void;
 
 
 
@@ -128,10 +129,10 @@ public:
 		)
 		-> void;
 
-//	auto
-//	remove_stencil(
-//		)
-//		-> void;
+///	auto
+///	remove_stencil(
+///		)
+///		-> void;
 
 private:
 

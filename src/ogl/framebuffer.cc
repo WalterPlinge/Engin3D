@@ -88,7 +88,7 @@ is_valid(
 auto Framebuffer::
 frames(
 	) const
-	-> std::unordered_map<std::size_t, Texture> const&
+	-> std::unordered_map<std::size_t, std::unique_ptr<Texture>> const&
 {
 	return colour_;
 }
@@ -100,25 +100,25 @@ frame(
 	-> std::optional<Texture const*>
 {
 	if (auto const f = colour_.find(index); f != colour_.end())
-		return &f->second;
+		return f->second.get();
 	return std::nullopt;
 }
 
 auto Framebuffer::
 depth(
 	) const
-	-> std::optional<Texture> const&
+	-> std::optional<std::unique_ptr<Texture>> const&
 {
 	return depth_;
 }
 
-//auto Framebuffer::
-//stencil(
-//	) const
-//	-> std::optional<Texture> const&
-//{
-//	return stencil_;
-//}
+///auto Framebuffer::
+///stencil(
+///	) const
+///	-> std::optional<std::unique_ptr<Texture>> const&
+///{
+///	return stencil_;
+///}
 
 
 
@@ -134,35 +134,38 @@ add_frame(
 {
 	bind();
 
-	glActiveTexture(GL_TEXTURE0);
+	glActiveTexture(GL_TEXTURE0 /* + index*/); // @OpenGL: See texture.hh about storing unit
 
-	auto tex = Texture(width_, height_);
-	glBindTexture(tex.type(), tex.id());
+	auto tex    = std::make_unique<Texture2D>(internal_format, GL_TEXTURE0 /* + index*/);
+	tex->width  = width_;
+	tex->height = height_;
+
+	glBindTexture(tex->target(), tex->id());
 	glTexImage2D(
-		tex.type(),
+		tex->target(),
 		0,
-		internal_format,
-		tex.width(),
-		tex.height(),
+		tex->format(),
+		tex->width,
+		tex->height,
 		0,
 		data_format,
 		data_type,
 		nullptr);
 
-	glTexParameteri(tex.type(), GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(tex.type(), GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(tex.type(), GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(tex.type(), GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(tex->target(), GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(tex->target(), GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(tex->target(), GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(tex->target(), GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, id_);
 	glFramebufferTexture2D(
 		GL_FRAMEBUFFER,
 		GL_COLOR_ATTACHMENT0 + index,
-		tex.type(),
-		tex.id(),
+		tex->target(),
+		tex->id(),
 		0);
 
-	colour_.insert(std::pair(index, tex));
+	colour_.insert(std::pair(index, std::move(tex)));
 
 	unbind();
 
@@ -178,35 +181,38 @@ add_depth(
 
 	glActiveTexture(GL_TEXTURE0);
 
-	auto tex = Texture(width_, height_);
-	glBindTexture(tex.type(), tex.id());
+	auto tex    = std::make_unique<Texture2D>(GL_DEPTH_COMPONENT, GL_TEXTURE0);
+	tex->width  = width_;
+	tex->height = height_;
+
+	glBindTexture(tex->target(), tex->id());
 	glTexImage2D(
-		tex.type(),
+		tex->target(),
 		0,
 		GL_DEPTH_COMPONENT,
-		tex.width(),
-		tex.height(),
+		tex->width,
+		tex->height,
 		0,
 		GL_DEPTH_COMPONENT,
 		GL_FLOAT,
 		nullptr);
 
-	glTexParameteri(tex.type(), GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(tex.type(), GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(tex.type(), GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(tex.type(), GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameterfv(tex.type(), GL_TEXTURE_BORDER_COLOR,
+	glTexParameteri (tex->target(), GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri (tex->target(), GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri (tex->target(), GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri (tex->target(), GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameterfv(tex->target(), GL_TEXTURE_BORDER_COLOR,
 		glm::value_ptr(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)));
 
 	glBindFramebuffer(GL_FRAMEBUFFER, id_);
 	glFramebufferTexture2D(
 		GL_FRAMEBUFFER,
 		GL_DEPTH_ATTACHMENT,
-		tex.type(),
-		tex.id(),
+		tex->target(),
+		tex->id(),
 		0);
 
-	depth_ = tex;
+	depth_ = std::move(tex);
 
 	unbind();
 }

@@ -279,7 +279,7 @@ bind(
 	-> void
 {
 	glActiveTexture(GL_TEXTURE0 + index);
-	glBindTexture(texture.type(), texture.id());
+	glBindTexture(texture.target(), texture.id());
 }
 
 auto
