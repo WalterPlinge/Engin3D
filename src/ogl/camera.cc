@@ -115,12 +115,12 @@ move(
 	std::function<glm::vec3()>
 	const static move_in[] =
 	{
-		[Right   ] = [&](){ return  right_ * v; },
-		[Left    ] = [&](){ return -right_ * v; },
-		[Forward ] = [&](){ return  front_ * v; },
-		[Backward] = [&](){ return -front_ * v; },
-		[Up      ] = [&](){ return  up_    * v; },
-		[Down    ] = [&](){ return -up_    * v; }
+		/* Right    */ [&](){ return  right_ * v; },
+		/* Left     */ [&](){ return -right_ * v; },
+		/* Forward  */ [&](){ return  front_ * v; },
+		/* Backward */ [&](){ return -front_ * v; },
+		/* Up       */ [&](){ return  up_    * v; },
+		/* Down     */ [&](){ return -up_    * v; }
 	};
 
 	position += move_in[direction]();
